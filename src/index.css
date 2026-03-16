@@ -1,0 +1,461 @@
+@import "tailwindcss";
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ============================================ */
+:root {
+  /* Brand colors */
+  --color-primary:        #f59e0b;
+  --color-primary-dark:   #d97706;
+  --color-primary-darker: #ea580c;
+
+  /* Background colors */
+  --color-bg-primary:   #f8fafc;
+  --color-bg-secondary: #f1f5f9;
+
+  /* Border */
+  --color-border-light: #e2e8f0;
+
+  /* Text */
+  --color-text-tertiary: #64748b;
+
+  /* Shadows */
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-amber: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+}
+
+/* ============================================
+   TABLE STYLES
+   ============================================ */
+
+/* --- Table Container --- */
+.table-container {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+/* --- Table Header Bar --- */
+.table-header {
+  background: linear-gradient(to right, #005fa3, #004080, #001f40);
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative overlay on header */
+.table-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, rgba(100, 116, 139, 0.1), rgba(71, 85, 105, 0.1));
+  pointer-events: none;
+}
+
+/* Ensure all header children stay above the overlay */
+.table-header * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header title text */
+.table-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* --- Table Element --- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table head row background */
+.table thead {
+  background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+}
+
+/* Table header cells */
+.table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+/* Table body cells */
+.table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Row hover effect */
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Remove border on last row */
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- Cell Alignment Utilities --- */
+.table-cell-center {
+  text-align: center;
+}
+
+.table-cell-right {
+  text-align: right;
+}
+
+/* --- Action Buttons Container --- */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* --- Icon Button (base) --- */
+.btn-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+}
+
+.btn-icon:hover {
+  background: #f8fafc;
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+/* Icon button – primary variant (edit, main action) */
+.btn-icon-primary {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+}
+
+.btn-icon-primary:hover {
+  box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+  transform: scale(1.1);
+}
+
+/* --- Primary Button (used for header CTA / Link) --- */
+.btn-primary {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #d97706, #ea580c);
+}
+
+/* --- Status Badges (for table cells) --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-primary {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* --- Responsive Table --- */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 600px;
+  }
+}
+
+/*****************************************************************************************************************************/
+/* ============================================
+   FORM LAYOUT & PAGE
+   ============================================ */
+
+/* Full page wrapper with background */
+.form-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+  padding: 3rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-page {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-page {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Centered content wrapper */
+.form-page-inner {
+  max-width: 42rem; /* max-w-2xl */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   FORM PAGE HEADER
+   ============================================ */
+
+/* Title section centered above the form */
+.form-page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Gradient title text */
+.form-page-title {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700;
+  background: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+}
+
+/* ============================================
+   BACK / NAVIGATION BUTTON
+   ============================================ */
+
+/* Container for the back button */
+.form-nav {
+  margin-bottom: 1.5rem;
+}
+
+/* Back button styled as a link */
+.form-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: white;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.form-nav-back:hover {
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-bg-secondary);
+}
+
+/* Icon inside the back button */
+.form-nav-back svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ============================================
+   FORM CARD (white container with top accent)
+   ============================================ */
+
+/* Outer card wrapper */
+.form-card {
+  background: white;
+  border-radius: 1rem; /* rounded-2xl */
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+}
+
+/* Gradient accent bar at the top of the card */
+.form-card-accent {
+  height: 0.5rem;
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-dark));
+}
+
+/* Inner padding for the form content */
+.form-card-body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
+
+/* Primary submit button with gradient */
+.form-submit {
+  width: 100%;
+  background: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
+  color: white;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: var(--shadow-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-submit:hover {
+  background: linear-gradient(to right, var(--color-primary-darker), var(--color-primary-dark));
+  box-shadow: var(--shadow-amber);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   FORM FOOTER / HELPER TEXT
+   ============================================ */
+
+/* Informational text below the form card */
+.form-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================
+   FORM FIELDS
+   ============================================ */
+
+/* Wrapper for all field groups inside a form */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Individual field block (label + input + error) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+/* Field label */
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Required asterisk */
+.required {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+/* Wrapper that allows positioning icons inside the input */
+.input-icon-wrapper {
+  position: relative;
+}
+
+/* Base input styles */
+.form-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: white;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Normal (no error) border */
+.form-input-normal {
+  border: 1px solid #cbd5e1;
+}
+
+.form-input-normal:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+/* Error border */
+.form-input-error {
+  border: 1px solid #ef4444;
+}
+
+.form-input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Container for the error message below an input */
+.error-message-container {
+  margin-top: 0.25rem;
+}

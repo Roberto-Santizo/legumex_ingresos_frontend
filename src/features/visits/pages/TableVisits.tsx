@@ -1,0 +1,199 @@
+import { useState } from "react"
+import { Link } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import {TableContainer, TableHeader, Table, TableHead, TableBody,TableRow, Th, Td, TableEmpty, TableActions} from "@/shared/components/ui/StyledTable"
+import { Pencil, Eye, X } from "lucide-react";
+import { getVisitsAPI } from "@/features/visits/api/VisitAPI"
+import PaginationComponent from "@/shared/components/PaginationComponent";
+
+const STATUS_BADGE: Record<string, string> = {
+    PROGRAMADA: "badge-warning",
+    "EN PLANTA": "badge-success",
+    FINALIZADA: "badge-info",
+    CANCELADA: "badge-error",
+}
+
+function StatusBadge({ name }: { name?: string }) {
+    if (!name) return <span className="text-slate-400">—</span>
+    return <span className={STATUS_BADGE[name] ?? "badge-info"}>{name}</span>
+}
+
+function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void }) {
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            onClick={onClose}
+        >
+            <div
+                className="relative bg-white rounded-lg shadow-xl w-full max-w-lg p-4"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button
+                    onClick={onClose}
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                    title="Cerrar"
+                >
+                    <X size={20} />
+                </button>
+                <img
+                    src={url}
+                    alt="Vista previa"
+                    className="w-full h-auto rounded max-h-[75vh] object-contain mt-4"
+                />
+            </div>
+        </div>
+    );
+}
+
+export default function TableVisits() {
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    const today = new Date().toISOString().split("T")[0]
+    const [selectedDate, setSelectedDate] = useState(today)
+
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ["visits", selectedDate, currentPage, pageSize],
+        queryFn: () => getVisitsAPI({ date: selectedDate, page: currentPage, perPage: pageSize }),
+    })
+
+    if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
+    if (isError) return <p className="p-8 text-center text-red-500">Error al cargar las visitas.</p>
+
+    const list = data?.visits ?? []
+    const totalPages = data?.lastPage ?? 1;
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    if(data) return (
+        <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
+            {previewUrl && (
+            <PhotoPreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} />
+             )}
+            <div className="max-w-7xl w-full">
+                <TableContainer>
+                    <TableHeader
+                        title="Listado de visitas"
+                        linkTo="/visits/create"
+                        linkText="Crear Visita"
+                    />
+
+                    <div className="px-6 py-3 flex items-center gap-3 border-b border-slate-200">
+                        <label className="text-sm font-semibold text-slate-600">Fecha:</label>
+                        <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={e => { setSelectedDate(e.target.value); setCurrentPage(1); }}
+                            className="form-input form-input-normal text-sm py-1 w-48"
+                        />
+                        {selectedDate !== today && (
+                            <button
+                                onClick={() => setSelectedDate(today)}
+                                className="text-xs text-amber-600 hover:underline"
+                            >
+                                Hoy
+                            </button>
+                        )}
+                    </div>
+
+                    {list.length > 0 ? (
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <Th>ID</Th>
+                                    <Th>Fecha de la visita</Th>
+                                    <Th>Visitante</Th>
+                                    <Th align="center">DPI / Licencia</Th>
+                                    <Th>Departamento</Th>
+                                    <Th>Responsable</Th>
+                                    <Th align="center">H. Entrada</Th>
+                                    <Th align="center">H. Salida</Th>
+                                    <Th align="center">Estado</Th>
+                                    <Th align="center">Acciones</Th>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {list.map(visit => (
+                                    <TableRow key={visit.id}>
+                                        <Td>{visit.id}</Td>
+                                        <Td>
+                                            {visit.date
+                                                ? visit.date.split("T")[0].split("-").reverse().join("/")
+                                                : "—"}
+                                        </Td>
+                                        <Td>
+                                            <div className="text-sm">
+                                                <p className="font-medium">{visit.visitor?.name ?? "—"}</p>
+                                                {visit.visitor_person && (
+                                                    <p className="text-slate-400">{visit.visitor_person.name}</p>
+                                                )}
+                                            </div>
+                                        </Td>
+                                        <Td align="center">
+                                            <div className="flex items-center justify-center gap-2">
+                                                {visit.visitor_person?.document_photo ? (
+                                                    <button
+                                                        onClick={() => setPreviewUrl(visit.visitor_person!.document_photo!)}
+                                                        className="btn-icon btn-icon-primary"
+                                                        title="Ver DPI"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">—</span>
+                                                )}
+                                                {visit.visitor_person?.license_photo ? (
+                                                    <button
+                                                        onClick={() => setPreviewUrl(visit.visitor_person!.license_photo!)}
+                                                        className="btn-icon btn-icon-primary"
+                                                        title="Ver Licencia"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">—</span>
+                                                )}
+                                            </div>
+                                        </Td>
+                                        <Td>{visit.department?.name ?? "—"}</Td>
+                                        <Td>{visit.responsible_person ?? "—"}</Td>
+                                        <Td align="center">{visit.entry_time ?? "—"}</Td>
+                                        <Td align="center">{visit.exit_time ?? "—"}</Td>
+                                        <Td align="center">
+                                            <StatusBadge name={visit.visit_status?.name} />
+                                        </Td>
+                                        <Td align="center">
+                                            <TableActions>
+                                                <Link
+                                                    to={`/visit/${visit.id}/edit`}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Editar"
+                                                >
+                                                    <Pencil size={16} />
+                                                </Link>
+                                            </TableActions>
+                                        </Td>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <TableEmpty
+                            message="No hay visitas registradas para esta fecha"
+                        />
+                    )}
+
+                    <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </TableContainer>
+            </div>
+        </div>
+    )
+}
