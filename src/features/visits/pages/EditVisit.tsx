@@ -38,13 +38,12 @@ function VisitSummary({ visit }: { visit: NonNullable<Awaited<ReturnType<typeof 
     )
 }
 
-function CheckInSection({ visitId, visitorId }: { visitId: number; visitorId: number }) {
+function CheckInSection({ visitId, visit }: { visitId: number; visit: NonNullable<Awaited<ReturnType<typeof getVisitByIdAPI>>> }) {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
 
     const methods = useForm<CheckInFormData>({
         defaultValues: {
-            visitor_person_id: 0,
             entry_time: now(),
             badge_number: "",
             agent_id: 0,
@@ -73,7 +72,7 @@ function CheckInSection({ visitId, visitorId }: { visitId: number; visitorId: nu
                     onSubmit={methods.handleSubmit((formData) => { if (!isPending) mutate(formData) })}
                     noValidate
                 >
-                    <CheckInForm visitorId={visitorId} />
+                    <CheckInForm visit={visit} />
                     <button type="submit" 
                         disabled={isPending}
                         className="px-6 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md"
@@ -193,7 +192,7 @@ export default function EditVisit() {
                 <VisitSummary visit={visit} />
 
                 {status === "PROGRAMADA" && (
-                    <CheckInSection visitId={Number(visitId)} visitorId={visit.visitor_id ?? 0} />
+                    <CheckInSection visitId={Number(visitId)} visit={visit} />
                 )}
 
                 {status === "EN PLANTA" && (

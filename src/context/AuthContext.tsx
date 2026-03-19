@@ -6,6 +6,7 @@ type AuthUser = LoginResponse["data"];
 export type AuthContextType = {
   user: AuthUser | null;
   token: string | null;
+  permissions: string[];
   loading: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;

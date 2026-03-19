@@ -1,63 +1,70 @@
-
 import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import AppLayout from '@/app/layouts/AppLayout';
 import { Spinner } from "@/shared/components/Spinner";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
+
+const NotFound    = lazy(() => import("@/app/pages/NotFound"));
+const Forbidden   = lazy(() => import("@/app/pages/Forbidden"));
 
 const routes = [
-  { path: "/404", component: lazy(() => import("@/app/pages/NotFound")), roles: [] },
-  { path: "*", component: lazy(() => import("@/app/pages/NotFound")), roles: [] },
-  
-  { path: "/role", component: lazy(() => import("@/features/roles/pages/TableRoleView")), roles: [] },
-  { path: "/role/create", component: lazy(() => import("@/features/roles/pages/CreateRol")), roles: [] },
-  { path: "/role/:roleId/edit", component: lazy(() => import("@/features/roles/pages/EditRole")), roles: [] },
+  { path: "/role",              component: lazy(() => import("@/features/roles/pages/TableRoleView")),      permission: "roles:view" },
+  { path: "/role/create",       component: lazy(() => import("@/features/roles/pages/CreateRol")),          permission: "roles:create" },
+  { path: "/role/:roleId/edit", component: lazy(() => import("@/features/roles/pages/EditRole")),           permission: "roles:edit" },
 
-  { path: "/user", component: lazy(() => import("@/features/users/pages/TableUserView")), roles: [] },
-  { path: "/user/create", component: lazy(() => import("@/features/users/pages/CreateUser")), roles: [] },
-  { path: "/user/:userId/edit", component: lazy(() => import("@/features/users/pages/EditUser")), roles: [] },
+  { path: "/user",              component: lazy(() => import("@/features/users/pages/TableUserView")),      permission: "users:view" },
+  { path: "/user/create",       component: lazy(() => import("@/features/users/pages/CreateUser")),         permission: "users:create" },
+  { path: "/user/:userId/edit", component: lazy(() => import("@/features/users/pages/EditUser")),           permission: "users:edit" },
 
-  { path: "/agent", component: lazy(() => import("@/features/agent/page/TableAgent")), roles: [] },
-  { path: "/agent/create", component: lazy(() => import("@/features/agent/page/CreateAgent")), roles: [] },
-  { path: "/agent/:agentId/edit", component: lazy(() => import("@/features/agent/page/EditAgent")), roles: [] },
+  { path: "/agent",             component: lazy(() => import("@/features/agent/page/TableAgent")),          permission: "agents:view" },
+  { path: "/agent/create",      component: lazy(() => import("@/features/agent/page/CreateAgent")),         permission: "agents:create" },
+  { path: "/agent/:agentId/edit", component: lazy(() => import("@/features/agent/page/EditAgent")),         permission: "agents:edit" },
 
-  { path: "/company", component: lazy(() => import("@/features/company/page/TableCompany")), roles: [] },
-  { path: "/company/create", component: lazy(() => import("@/features/company/page/CreateCompany")), roles: [] },
-  { path: "/company/:companyId/edit", component: lazy(() => import("@/features/company/page/EditCompany")), roles: [] },
+  { path: "/company",           component: lazy(() => import("@/features/company/page/TableCompany")),      permission: "companies:view" },
+  { path: "/company/create",    component: lazy(() => import("@/features/company/page/CreateCompany")),     permission: "companies:create" },
+  { path: "/company/:companyId/edit", component: lazy(() => import("@/features/company/page/EditCompany")), permission: "companies:edit" },
 
+  { path: "/department",        component: lazy(() => import("@/features/department/page/DepartmentTable")),   permission: "departments:view" },
+  { path: "/department/create", component: lazy(() => import("@/features/department/page/CreateDepartment")),  permission: "departments:create" },
+  { path: "/department/:departmentId/edit", component: lazy(() => import("@/features/department/page/EditDepartment")), permission: "departments:edit" },
 
-  { path: "/department", component: lazy(() => import("@/features/department/page/DepartmentTable")), roles: [] },
-  { path: "/department/create", component: lazy(() => import("@/features/department/page/CreateDepartment")), roles: [] },
-  { path: "/department/:departmentId/edit", component: lazy(() => import("@/features/department/page/EditDepartment")), roles: [] },
+  { path: "/visitor",           component: lazy(() => import("@/features/visitors/page/TableVisitor")),     permission: "visitors:view" },
+  { path: "/visitor/create",    component: lazy(() => import("@/features/visitors/page/CreateVisitor")),    permission: "visitors:create" },
+  { path: "/visitor/:visitorId/edit", component: lazy(() => import("@/features/visitors/page/EditVisitor")), permission: "visitors:edit" },
 
+  { path: "/report",            component: lazy(() => import("@/features/visitReport/page/DashboardView")), permission: "reports:view" },
 
-  { path: "/visitor", component: lazy(() => import("@/features/visitors/page/TableVisitor")), roles: [] },
-  { path: "/visitor/create", component: lazy(() => import("@/features/visitors/page/CreateVisitor")), roles: [] },
-  { path: "/visitor/:visitorId/edit", component: lazy(() => import("@/features/visitors/page/EditVisitor")), roles: [] },
-
-  { path: "/report", component: lazy(() => import("@/features/visitReport/page/DashboardView")), roles: [] },
-
-  { path: "/visits", component: lazy(() => import("@/features/visits/pages/TableVisits")), roles: [] },
-  { path: "/visits/create", component: lazy(() => import("@/features/visits/pages/CreateVisit")), roles: [] },
-  { path: "/visits/:visitId/checkin", component: lazy(() => import("@/features/visits/pages/CheckInView")), roles: [] },
-  { path: "/visits/:visitId/checkout", component: lazy(() => import("@/features/visits/pages/CheckOutView")), roles: [] },
-  { path: "/visit/:visitId/edit", component: lazy(() => import("@/features/visits/pages/EditVisit")), roles: [] },
-
+  { path: "/visits",            component: lazy(() => import("@/features/visits/pages/TableVisits")),       permission: "visits:view" },
+  { path: "/visits/create",     component: lazy(() => import("@/features/visits/pages/CreateVisit")),       permission: "visits:create" },
+  { path: "/visits/:visitId/checkin",  component: lazy(() => import("@/features/visits/pages/CheckInView")), permission: "visits:checkin" },
+  { path: "/visits/:visitId/checkout", component: lazy(() => import("@/features/visits/pages/CheckOutView")), permission: "visits:checkout" },
+  { path: "/visit/:visitId/edit",      component: lazy(() => import("@/features/visits/pages/EditVisit")),    permission: "visits:view" },
 ];
 
 export default function AdminRoutes() {
   return (
-    <Route element={<AppLayout />}>
-      {routes.map(({ path, component: Component }) => (
-        <Route
-          key={path}
-          path={path}
-          element={
-            <Suspense fallback={<Spinner />}>
-              <Component />
-            </Suspense>
-          }
-        />
-      ))}
+    <Route element={<ProtectedRoute />}>
+      <Route element={<AppLayout />}>
+        <Route path="/403" element={<Suspense fallback={<Spinner />}><Forbidden /></Suspense>} />
+        <Route path="/404" element={<Suspense fallback={<Spinner />}><NotFound /></Suspense>} />
+        <Route path="*"    element={<Suspense fallback={<Spinner />}><NotFound /></Suspense>} />
+
+        {routes.map(({ path, component: Component, permission }) => (
+          <Route
+            key={path}
+            element={<ProtectedRoute permission={permission} />}
+          >
+            <Route
+              path={path}
+              element={
+                <Suspense fallback={<Spinner />}>
+                  <Component />
+                </Suspense>
+              }
+            />
+          </Route>
+        ))}
+      </Route>
     </Route>
   );
 }

@@ -12,6 +12,7 @@ export const loginResponseSchema = z.object({
     name: z.string(),
     username: z.string(),
     role: z.string(),
+    permissions: z.array(z.string()),
   }),
   token: z.string(),
 });

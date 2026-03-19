@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
@@ -20,15 +21,26 @@ export default function CheckInView() {
         enabled: !!visitId,
     })
 
-    const initialValues: CheckInFormData = {
-        visitor_person_id: 0,
-        entry_time: currentTime,
-        badge_number: "",
-        agent_id: 0,
-        companions: [],
-    }
+    const methods = useForm<CheckInFormData>({
+        defaultValues: {
+            entry_time: currentTime,
+            badge_number: "",
+            agent_id: 0,
+            companions: [],
+        },
+        mode: "onChange",
+    })
 
-    const methods = useForm({ defaultValues: initialValues, mode: "onChange" })
+    useEffect(() => {
+        if (visit) {
+            methods.reset({
+                entry_time: currentTime,
+                badge_number: "",
+                agent_id: 0,
+                companions: [],
+            })
+        }
+    }, [visit])
 
     const { mutate, isPending } = useMutation({
         mutationFn: (formData: CheckInFormData) => checkInAPI({ visitId: Number(visitId), formData }),
@@ -48,6 +60,8 @@ export default function CheckInView() {
 
     if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando datos de la visita...</p>
 
+    if (!visit) return null
+
     return (
         <div className="form-page">
             <div className="form-page-inner">
@@ -63,33 +77,31 @@ export default function CheckInView() {
                     </Link>
                 </div>
 
-                {visit && (
-                    <div className="form-card mb-4">
-                        <div className="form-card-accent"></div>
-                        <div className="p-5 space-y-2 text-sm text-slate-700">
-                            <p><span className="font-semibold">Empresa / Visitante:</span> {visit.visitor?.name ?? "—"}</p>
-                            <p><span className="font-semibold">Departamento:</span> {visit.department?.name ?? "—"}</p>
-                            <p><span className="font-semibold">Responsable:</span> {visit.responsible_person ?? "—"}</p>
-                            <p><span className="font-semibold">Destino:</span> {visit.destination ?? "—"}</p>
-                        </div>
+                <div className="form-card mb-4">
+                    <div className="form-card-accent"></div>
+                    <div className="p-5 space-y-2 text-sm text-slate-700">
+                        <p><span className="font-semibold">Empresa / Visitante:</span> {visit.visitor?.name ?? "—"}</p>
+                        <p><span className="font-semibold">Departamento:</span> {visit.department?.name ?? "—"}</p>
+                        <p><span className="font-semibold">Responsable:</span> {visit.responsible_person ?? "—"}</p>
+                        <p><span className="font-semibold">Destino:</span> {visit.destination ?? "—"}</p>
                     </div>
-                )}
+                </div>
 
                 <div className="form-card">
                     <div className="form-card-accent"></div>
                     <FormProvider {...methods}>
                         <form className="form-card-body" onSubmit={methods.handleSubmit(handleForm)} noValidate>
-                            <CheckInForm visitorId={visit?.visitor_id ?? 0} />
-                            <button type="submit" 
-                                className="form-submit" 
+                            <CheckInForm visit={visit} />
+                            <button type="submit"
+                                className="form-submit"
                                 disabled={isPending}
                             >
-                                {isPending?(
-                                  <span className="flex items-center gap-2">
+                                {isPending ? (
+                                    <span className="flex items-center gap-2">
                                         <span className="animate-spin">⏳</span>
                                         Registrando....
-                                 </span>
-                                ):(
+                                    </span>
+                                ) : (
                                     "Confirmar entrada"
                                 )}
                             </button>

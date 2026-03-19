@@ -14,10 +14,12 @@ export default function CreateVisit() {
 
     const initialValues: CreateVisitFormData = {
         visitor_id: 0,
+        visitor_person_id: 0,
         date: today,
         department_id: 0,
         responsible_person: "",
         destination: "",
+        companions: [],
     }
 
     const methods = useForm({ defaultValues: initialValues, mode: "onChange" })
@@ -56,7 +58,7 @@ export default function CreateVisit() {
                     <div className="form-card-accent"></div>
                     <FormProvider {...methods}>
                         <form className="form-card-body" onSubmit={methods.handleSubmit(handleForm)} noValidate>
-                            <CreateVisitForm />
+                            <CreateVisitForm/>
                             <button type="submit"
                                 disabled={isPending}
                                 className="form-submit" 

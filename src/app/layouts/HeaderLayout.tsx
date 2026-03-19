@@ -70,11 +70,11 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
               <img src= {import.meta.env.VITE_IMAGE_LOGO} alt="LegumexLogo" className="w-20 h-12 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-white tracking-tight">
+              <h1 className="text-lx font-bold text-white tracking-tight">
                 Recursos Humanos
               </h1>
-              <p className="text-xs text-slate-400 font-medium">
-                “Control de accesos a planta”
+              <p className="text-xl text-slate-400 font-medium">
+                ⭐“Cada día es una oportunidad para hacer las cosas mejor.”⭐
               </p>
             </div>
           </div>

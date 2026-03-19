@@ -2,7 +2,7 @@ import { isAxiosError } from "axios"
 import { z } from "zod"
 import api from "@/shared/api/axios"
 import type { CreateVisitFormData, CheckInFormData, CheckOutFormData } from "../schema/Types"
-import { visitResponseSchema } from "../schema/Types"
+import { visitResponseSchema, getVisitsSchema } from "../schema/Types"
 
 const visitsListSchema = z.array(visitResponseSchema)
 const visitorSelectSchema = z.object({ id: z.number(), name: z.string() })
@@ -31,17 +31,14 @@ export async function getVisitsTodayAPI() {
     }
 }
 
-export async function getVisitsAPI(params?: { date?: string; status?: string; page?: number; perPage?: number }) {
+export async function getVisitsAPI(page: number = 1, filters?: { date?: string; status?: string }) {
     try {
-        const { data } = await api.get("/visit", { params })
-        const parsed = visitsListSchema.safeParse(data.data?.data ?? data.data)
-        if (!parsed.success) {
-            console.error("Error al parsear visitas:", parsed.error.issues)
-            return { visits: [], lastPage: 1 }
-        }
+        const limit = 10;
+        const { data } = await api.get("/visit", { params: { page, limit, ...filters } })
+        const parsedData = getVisitsSchema.parse(data)
         return {
-            visits: parsed.data,
-            lastPage: data.data?.last_page ?? 1,
+            visits: parsedData.response,
+            lastPage: parsedData.lastPage,
         }
     } catch (error) {
         if (isAxiosError(error) && error.response) {

@@ -48,15 +48,14 @@ function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void 
 export default function TableVisits() {
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(10);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const today = new Date().toISOString().split("T")[0]
     const [selectedDate, setSelectedDate] = useState(today)
 
     const { data, isLoading, isError } = useQuery({
-        queryKey: ["visits", selectedDate, currentPage, pageSize],
-        queryFn: () => getVisitsAPI({ date: selectedDate, page: currentPage, perPage: pageSize }),
+        queryKey: ["visits", selectedDate, currentPage],
+        queryFn: () => getVisitsAPI(currentPage, { date: selectedDate }),
     })
 
     if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
@@ -69,7 +68,7 @@ export default function TableVisits() {
         setCurrentPage(page);
     };
 
-    if(data) return (
+    return (
         <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
             {previewUrl && (
             <PhotoPreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} />
@@ -108,7 +107,9 @@ export default function TableVisits() {
                                     <Th>Fecha de la visita</Th>
                                     <Th>Visitante</Th>
                                     <Th align="center">DPI / Licencia</Th>
+                                    <Th>Acompañantes</Th>
                                     <Th>Departamento</Th>
+                                    <Th>Área de Destino</Th>
                                     <Th>Responsable</Th>
                                     <Th align="center">H. Entrada</Th>
                                     <Th align="center">H. Salida</Th>
@@ -159,7 +160,22 @@ export default function TableVisits() {
                                                 )}
                                             </div>
                                         </Td>
+                                        <Td>
+                                            {visit.visit_companions && visit.visit_companions.length > 0 ? (
+                                                <ul className="text-sm space-y-1">
+                                                    {visit.visit_companions.map((c, i) => (
+                                                        <li key={c.id ?? i} className="text-slate-600">
+                                                            <span className="font-medium">{c.visitor_person?.name ?? "—"}</span>
+                                                            <span className="text-slate-400 ml-1">DPI: {c.visitor_person?.document_number ?? "—"}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <span className="text-slate-400 text-sm">—</span>
+                                            )}
+                                        </Td>
                                         <Td>{visit.department?.name ?? "—"}</Td>
+                                        <Td>{visit.destination}</Td>
                                         <Td>{visit.responsible_person ?? "—"}</Td>
                                         <Td align="center">{visit.entry_time ?? "—"}</Td>
                                         <Td align="center">{visit.exit_time ?? "—"}</Td>

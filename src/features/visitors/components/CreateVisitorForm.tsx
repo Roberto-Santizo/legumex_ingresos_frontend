@@ -112,7 +112,6 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiIm
             <div className="form-group">
                 <label htmlFor="license_number" className="form-label">
                     Licencia
-                    <span className="required">*</span>
                 </label>
                 <div className="input-icon-wrapper">
                     <input
@@ -120,9 +119,6 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiIm
                         type="text"
                         placeholder="2545124512414"
                         className={`form-input ${errors.license_number ? "form-input-error" : "form-input-normal"}`}
-                        {...register("license_number", {
-                            required: "La licencia es obligatoria",
-                        })}
                     />
                 </div>
                 {errors.license_number && (
@@ -132,7 +128,7 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiIm
 
             {showPhotoFields && (
                 <div className="form-group">
-                    <label className="form-label font-bold">Fotografía DPI <span className="required">*</span></label>
+                    <label className="form-label font-bold">Fotografía DPI <span className="text-sm text-gray-500 font-normal">(al menos una requerida)</span></label>
 
                     {dpiImage ? (
                         <img src={dpiImage} className="h-40 w-40 rounded-lg border mb-2 shadow" />
@@ -152,13 +148,7 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiIm
                     >
                         Tomar foto DPI
                     </button>
-                    <input type="hidden" {...register("document_photo", {
-                        required: "La fotografía del DPI es obligatoria",
-                         })} 
-                    />
-                    {errors.document_photo && (
-                        <ErrorMessage>{errors.document_photo.message}</ErrorMessage>
-                    )}
+                    <input type="hidden" {...register("document_photo")} />
                 </div>
             )}
 

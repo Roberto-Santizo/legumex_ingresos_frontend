@@ -1,26 +1,29 @@
+import { paginationSchema } from "@/shared/schemas/paginateSchemas"
 import { z } from "zod"
 
 export const createVisitSchema = z.object({
-    visitor_id: z.number().min(1, "El visitante es obligatorio"),
+    visitor_id: z.number(),
+    visitor_person_id: z.number(),
     date: z.string(),
-    department_id: z.number().min(1, "El departamento es obligatorio"),
+    department_id: z.number(),
     responsible_person: z.string(),
     destination: z.string(),
+    companions: z.array(z.object({
+        visitor_person_id: z.number(),
+    })).optional(),
 })
 
 export const checkInSchema = z.object({
-    visitor_person_id: z.number().min(1, "Debe seleccionar la persona que llegó"),
     entry_time: z.string(),
     badge_number: z.string(),
-    agent_id: z.number().min(1, "El agente es obligatorio"),
+    agent_id: z.number(),
     companions: z.array(z.object({
-        visitor_person_id: z.number(),
         badge_number: z.string(),
     })).optional(),
 })
 
 export const checkOutSchema = z.object({
-    exit_time: z.string().min(1, "La hora de salida es obligatoria"),
+    exit_time: z.string(),
 })
 
 const visitorPersonSchema = z.object({
@@ -58,6 +61,9 @@ export const visitResponseSchema = z.object({
     })).nullable().optional(),
 })
 
+export const getVisitsSchema = paginationSchema(visitResponseSchema)
+
+export type GetVisitsApiResponse = z.infer<typeof getVisitsSchema>
 export type CreateVisitFormData = z.infer<typeof createVisitSchema>
 export type CheckInFormData = z.infer<typeof checkInSchema>
 export type CheckOutFormData = z.infer<typeof checkOutSchema>

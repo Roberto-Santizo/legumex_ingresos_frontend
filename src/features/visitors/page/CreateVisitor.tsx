@@ -27,7 +27,11 @@ export default function CreateVisitor() {
     const handleForm = async (formData: CreateVisitorFormData)=>{
         if(isPending)
             return;
-            mutate(formData)
+        if(!formData.document_photo && !formData.license_photo){
+            toast.error("Debe agregar al menos una fotografía (DPI o Licencia)");
+            return;
+        }
+        mutate(formData)
     }
     return (
         <div className="form-page">

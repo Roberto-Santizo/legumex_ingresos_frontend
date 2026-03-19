@@ -1,41 +1,30 @@
-import {UserCog,User,UserLock,Building2,Building,PersonStanding, UserPlus,AlignEndHorizontal  } from "lucide-react";
+import { UserCog, User, UserLock, Building2, Building, PersonStanding, UserPlus, AlignEndHorizontal } from "lucide-react";
 import NavLinkComponent from "@/shared/components/NavLinkComponent";
+import { useAuth } from "@/hooks/useAuth";
+
+const NAV_ITEMS = [
+  { url: "/visits",     text: "Listado de visitas", icon: <PersonStanding />,     permission: "visits:view" },
+  { url: "/report",     text: "Dashboard",          icon: <AlignEndHorizontal />, permission: "reports:view" },
+  { url: "/user",       text: "Usuarios",           icon: <User />,               permission: "users:view" },
+  { url: "/role",       text: "Roles",              icon: <UserCog />,            permission: "roles:view" },
+  { url: "/agent",      text: "Agentes",            icon: <UserLock />,           permission: "agents:view" },
+  { url: "/company",    text: "Empresas",           icon: <Building2 />,          permission: "companies:view" },
+  { url: "/department", text: "Departamento",       icon: <Building />,           permission: "departments:view" },
+  { url: "/visitor",    text: "Visitantes",         icon: <UserPlus />,           permission: "visitors:view" },
+];
 
 export default function Navegation() {
+  const { permissions } = useAuth();
+
+  const visibleItems = NAV_ITEMS.filter(item => permissions.includes(item.permission));
+
   return (
     <div className="space-y-1.5">
-
-        <NavLinkComponent url="/user" text="Usuarios">
-          <User />
+      {visibleItems.map(item => (
+        <NavLinkComponent key={item.url} url={item.url} text={item.text}>
+          {item.icon}
         </NavLinkComponent>
-
-        <NavLinkComponent url="/role" text="Roles">
-          <UserCog />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/report" text="Dashboard">
-          <AlignEndHorizontal  />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/agent" text="Agentes">
-          <UserLock  />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/company" text="Empresas">
-          <Building2  />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/department" text="Departamento">
-          <Building  />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/visitor" text="Visitantes">
-          <UserPlus  />
-        </NavLinkComponent>
-
-        <NavLinkComponent url="/visits" text="Listado de visitas">
-          <PersonStanding  />
-        </NavLinkComponent>
+      ))}
     </div>
   );
 }
