@@ -28,8 +28,14 @@ export default function CreateVisitor() {
     const handleForm = async (formData: CreateVisitorFormData)=>{
         if(isPending)
             return;
-        if(!formData.document_photo_front && !formData.license_photo){
-            toast.error("Debe agregar al menos una fotografía (DPI frontal o Licencia)");
+        const hasFront = !!formData.document_photo_front;
+        const hasBack = !!formData.document_photo_back;
+        if (hasFront && !hasBack) {
+            toast.error("Si ingresa la foto frontal del DPI, también debe ingresar la foto posterior.");
+            return;
+        }
+        if (hasBack && !hasFront) {
+            toast.error("Si ingresa la foto posterior del DPI, también debe ingresar la foto frontal.");
             return;
         }
         mutate(formData)

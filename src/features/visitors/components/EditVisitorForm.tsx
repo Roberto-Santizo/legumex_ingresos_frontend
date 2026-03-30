@@ -32,7 +32,7 @@ export default function EditVisitorForm({data, visitorId}:EditVisitorProps) {
             toast.error(error.message)
         },
         onSuccess(data) {
-            queryClient.invalidateQueries({queryKey:['visitor']})
+            queryClient.invalidateQueries({queryKey:['visitors']})
             queryClient.invalidateQueries({queryKey:['editVisitor', visitorId]})
             queryClient.invalidateQueries({queryKey:['visitor-persons-select']})
             toast.success(data.message)
