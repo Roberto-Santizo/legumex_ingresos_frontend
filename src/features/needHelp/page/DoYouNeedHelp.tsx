@@ -49,15 +49,20 @@ export default function DoYouNeedHelp() {
                 title: "Manual de Usuario – Agentes",
                 desc: "Instrucciones para el flujo de trabajo diario de agentes.",
                 icon: FileText,
+                href: "/PlantAccessProjectSecurity.pdf",
               },
               {
                 title: "Manual de Usuario – Administración",
                 desc: "Guía completa para administradores del sistema.",
                 icon: Shield,
+                href: "/UserManualPlantAccess.pdf",
               },
-            ].map(({ title, desc, icon: Icon }) => (
-              <div
+            ].map(({ title, desc, icon: Icon, href }) => (
+              <a
                 key={title}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group flex items-center gap-4 p-4 rounded-xl border-2 border-slate-100 hover:border-amber-400 hover:bg-amber-50 transition-all duration-300 cursor-pointer"
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:from-amber-200 group-hover:to-orange-200 transition-all">
@@ -70,7 +75,7 @@ export default function DoYouNeedHelp() {
                   <p className="text-sm text-slate-500">{desc}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
-              </div>
+              </a>
             ))}
           </div>
         </div>
