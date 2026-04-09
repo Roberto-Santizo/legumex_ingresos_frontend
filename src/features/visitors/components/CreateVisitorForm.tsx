@@ -73,7 +73,7 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiFr
                     <input
                         id="name"
                         type="text"
-                        placeholder="NM Solution"
+                        placeholder="Luis González"
                         className={`form-input ${errors.name ? "form-input-error" : "form-input-normal"}`}
                         {...register("name", {
                             setValueAs: toUpper,

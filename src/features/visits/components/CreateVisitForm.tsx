@@ -187,7 +187,6 @@ export default function CreateVisitForm() {
                     id="responsible_person"
                     type="text"
                     placeholder="Nombre de quien recibe la visita"
-                    readOnly
                     className="form-input form-input-normal bg-slate-50 cursor-default"
                     {...register("responsible_person", {
                         setValueAs: toUpper,
@@ -213,7 +212,6 @@ export default function CreateVisitForm() {
                 />
                 {errors.destination && <ErrorMessage>{errors.destination.message}</ErrorMessage>}
             </div>
-
         </div>
     )
 }
