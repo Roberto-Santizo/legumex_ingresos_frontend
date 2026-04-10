@@ -49,8 +49,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setPermissions(userPermissions);
       localStorage.setItem("permissions", JSON.stringify(userPermissions));
 
-      toast.success("Session started successfully");
-
       // Redirigir al primer módulo accesible según permisos
       const NAV_ORDER = [
         { permission: "visits:view",      path: "/visits" },

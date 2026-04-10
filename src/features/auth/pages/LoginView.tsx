@@ -1,45 +1,36 @@
 import { User, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { LoginRequest } from "@/features/auth/schemas/types";
-import { loginApi } from "@/features/auth/api/LoginAPI";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { ErrorMessage } from "@/shared/components/ErrorMessage";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginView() {
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [isPending, setIsPending] = useState(false);
+  const { login } = useAuth();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginRequest>({ mode: "onChange" });
 
-  // CRÍTICO: Limpiar TODO al montar el componente de login
+  // Limpiar localStorage al montar el componente de login
   useEffect(() => {
     localStorage.clear();
   }, []);
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: loginApi,
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    onSuccess: (response) => {
-      // Limpiar y guardar nuevo token
-      localStorage.clear();
-      localStorage.setItem("token", response.token);
-      
-      toast.success("Login exitoso");
-      
-      // Recargar página para estado completamente limpio
-      window.location.href = "/visits";
-    },
-  });
-  
-  const onSubmit = (formData: LoginRequest) => {
-    mutate(formData);
+  const onSubmit = async (formData: LoginRequest) => {
+    setIsPending(true);
+    try {
+      await login(formData);
+    } catch (error: any) {
+      toast.error(error?.message ?? "Error al iniciar sesión");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (

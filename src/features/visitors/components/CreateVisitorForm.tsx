@@ -233,7 +233,6 @@ export default function CreateVisitorForm({ showPhotoFields = true, initialDpiFr
                     onSave={handleSavePhoto}
                 />
             )}
-
         </div>
     );
 }
