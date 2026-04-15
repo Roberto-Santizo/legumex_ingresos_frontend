@@ -6,6 +6,7 @@ import { searchableSelectStyles, getSelectClassNames } from "@/shared/components
 import type { CheckInFormData } from "@/features/visits/schema/Types"
 import type { VisitResponse } from "@/features/visits/schema/Types"
 import { getAgentForSelectAPI } from "@/features/agent/api/agentAPI"
+import { toUpper } from "@/shared/helpers/textTransformUppercase"
 
 type CheckInFormProps = {
     visit: VisitResponse | undefined
@@ -61,6 +62,21 @@ export default function CheckInForm({ visit }: CheckInFormProps) {
                     {...register("entry_time", { required: "La hora de entrada es obligatoria" })}
                 />
                 {errors.entry_time && <ErrorMessage>{errors.entry_time.message}</ErrorMessage>}
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="entry_time" className="form-label">
+                    Placas Vehículo 
+                </label>
+                <input
+                    id="license_plate"
+                    placeholder="P123ABC"
+                    type="text"
+                        className="form-input form-input-normal"
+                    {...register("license_plate",{
+                            setValueAs: toUpper,
+                    })}
+                />
             </div>
 
             <div className="form-group">

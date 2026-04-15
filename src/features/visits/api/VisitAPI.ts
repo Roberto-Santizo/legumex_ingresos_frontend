@@ -61,10 +61,8 @@ export async function getVisitByIdAPI(visitId: number) {
 }
 
 export async function checkInAPI({ visitId, formData }: { visitId: number; formData: CheckInFormData }) {
-    console.log("checkInAPI - visitId:", visitId, "formData:", formData)
     try {
         const { data } = await api.patch(`/visit/${visitId}/checkin`, formData)
-        console.log("checkInAPI - response:", data)
         return data
     } catch (error) {
         if (isAxiosError(error) && error.response) {

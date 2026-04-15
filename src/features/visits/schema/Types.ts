@@ -17,6 +17,7 @@ export const checkInSchema = z.object({
     entry_time: z.string(),
     badge_number: z.string(),
     agent_id: z.number(),
+    license_plate: z.string().nullable().optional(),
     companions: z.array(z.object({
         badge_number: z.string(),
     })).optional(),
@@ -43,6 +44,7 @@ export const visitResponseSchema = z.object({
     visit_status_id: z.number().nullable().optional(),
     company_id: z.number().nullable().optional(),
     company_person_id: z.number().nullable().optional(),
+    license_plate: z.string().nullable().optional(),
     department_id: z.number().nullable().optional(),
     destination: z.string().nullable().optional(),
     responsible_person: z.string().nullable().optional(),

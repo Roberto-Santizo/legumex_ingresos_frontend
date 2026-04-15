@@ -164,6 +164,7 @@ export default function TableVisits() {
                                     <Th>Visitante</Th>
                                     <Th align="center">DPI / Licencia</Th>
                                     <Th>Acompañantes</Th>
+                                    <Th>Placas de Vehículo</Th>
                                     <Th>Departamento</Th>
                                     <Th>Área de Destino</Th>
                                     <Th>Responsable</Th>
@@ -216,6 +217,7 @@ export default function TableVisits() {
                                                 )}
                                             </div>
                                         </Td>
+                                        
                                         <Td>
                                             {visit.visit_companions && visit.visit_companions.length > 0 ? (
                                                 <ul className="text-sm space-y-1">
@@ -230,6 +232,7 @@ export default function TableVisits() {
                                                 <span className="text-slate-400 text-sm">—</span>
                                             )}
                                         </Td>
+                                        <Td>{visit.license_plate ?? "—"}</Td>
                                         <Td>{visit.department?.name ?? "—"}</Td>
                                         <Td>{visit.destination}</Td>
                                         <Td>{visit.responsible_person ?? "—"}</Td>
