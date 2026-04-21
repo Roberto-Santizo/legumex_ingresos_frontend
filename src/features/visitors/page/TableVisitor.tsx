@@ -2,12 +2,21 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Eye, X } from "lucide-react";
-import {TableContainer,TableHeader,Table,TableHead,TableBody,TableRow,Th,Td,TableEmpty,TableActions} from "@/shared/components/ui/StyledTable";
-
+import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable";
 import PaginationComponent from "@/shared/components/PaginationComponent";
-import { getVisitorAPI } from "../api/VisitorsAPI";
+import { getVisitorAPI, getVisitorByIdAPI } from "../api/VisitorsAPI";
 
-function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void }) {
+type PhotoType = "document_photo_front" | "document_photo_back" | "license_photo"
+type PhotoTarget = { personId: number; photoType: PhotoType }
+
+function PhotoPreviewModal({ target, onClose }: { target: PhotoTarget; onClose: () => void }) {
+    const { data, isLoading } = useQuery({
+        queryKey: ["visitor-photo", target.personId, target.photoType],
+        queryFn: () => getVisitorByIdAPI(target.personId),
+    })
+
+    const url = data?.[target.photoType] ?? null
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -24,47 +33,52 @@ function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void 
                 >
                     <X size={20} />
                 </button>
-                <img
-                    src={url}
-                    alt="Vista previa"
-                    className="w-full h-auto rounded max-h-[75vh] object-contain mt-4"
-                />
+                <div className="mt-4">
+                    {isLoading && <p className="text-center text-slate-500 py-8">Cargando foto...</p>}
+                    {!isLoading && url && (
+                        <img
+                            src={url}
+                            alt="Vista previa"
+                            className="w-full h-auto rounded max-h-[75vh] object-contain"
+                        />
+                    )}
+                    {!isLoading && !url && (
+                        <p className="text-center text-slate-400 py-8">Sin foto disponible</p>
+                    )}
+                </div>
             </div>
         </div>
-    );
+    )
 }
 
 export default function TableVisitor() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(10);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1)
+    const [photoTarget, setPhotoTarget] = useState<PhotoTarget | null>(null)
 
-    const {data, isLoading, isError} = useQuery({
-        queryKey: ["visitors", currentPage, pageSize],
-        queryFn: () => getVisitorAPI(currentPage)
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ["visitors", currentPage],
+        queryFn: () => getVisitorAPI(currentPage),
     })
 
-    if(isLoading) return <p>Cargando visitantes</p>
-    if(isError) return <p>Error al cargar los datos</p>
+    if (isLoading) return <p>Cargando visitantes</p>
+    if (isError) return <p>Error al cargar los datos</p>
 
-    const visitors = data?.response || [];
-    const totalPages = data?.lastPage || 1;
+    const visitors = data?.response || []
+    const totalPages = data?.lastPage || 1
 
-    const handlePageChange = (page:number)=> setCurrentPage(page);
-
-  if(data) return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
-        {previewUrl && (
-            <PhotoPreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} />
-        )}
-        <div className="max-w-6xl w-full">
-            <TableContainer>
-                <TableHeader
-                    title = "Lista de visitantes (Proveedores, Clientes)"
-                    linkTo="/people/create"
-                    linkText="Crear Visitante"
-                />
-                    {visitors.length> 0 ?(
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
+            {photoTarget && (
+                <PhotoPreviewModal target={photoTarget} onClose={() => setPhotoTarget(null)} />
+            )}
+            <div className="max-w-6xl w-full">
+                <TableContainer>
+                    <TableHeader
+                        title="Lista de visitantes (Proveedores, Clientes)"
+                        linkTo="/people/create"
+                        linkText="Crear Visitante"
+                    />
+                    {visitors.length > 0 ? (
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -78,18 +92,18 @@ export default function TableVisitor() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {visitors.map((visitor)=>(
+                                {visitors.map((visitor) => (
                                     <TableRow key={visitor.id}>
                                         <Td>{visitor.id}</Td>
                                         <Td>{visitor.name}</Td>
-                                        <Td>{visitor.company?.name ?? '—'}</Td>
+                                        <Td>{visitor.company?.name ?? "—"}</Td>
                                         <Td>{visitor.document_number}</Td>
-                                        <Td>{visitor.license_number}</Td>
+                                        <Td>{visitor.license_number ?? "—"}</Td>
                                         <Td align="center">
                                             <div className="flex items-center justify-center gap-2">
-                                                {visitor.document_photo_front ? (
+                                                {visitor.has_document_photo_front ? (
                                                     <button
-                                                        onClick={() => setPreviewUrl(visitor.document_photo_front!)}
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_front" })}
                                                         className="btn-icon btn-icon-primary"
                                                         title="Ver DPI Frontal"
                                                     >
@@ -98,9 +112,9 @@ export default function TableVisitor() {
                                                 ) : (
                                                     <span className="text-gray-400 text-sm">—</span>
                                                 )}
-                                                {visitor.document_photo_back ? (
+                                                {visitor.has_document_photo_back ? (
                                                     <button
-                                                        onClick={() => setPreviewUrl(visitor.document_photo_back!)}
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_back" })}
                                                         className="btn-icon btn-icon-primary"
                                                         title="Ver DPI Posterior"
                                                     >
@@ -109,9 +123,9 @@ export default function TableVisitor() {
                                                 ) : (
                                                     <span className="text-gray-400 text-sm">—</span>
                                                 )}
-                                                {visitor.license_photo ? (
+                                                {visitor.has_license_photo ? (
                                                     <button
-                                                        onClick={() => setPreviewUrl(visitor.license_photo)}
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "license_photo" })}
                                                         className="btn-icon btn-icon-primary"
                                                         title="Ver Licencia"
                                                     >
@@ -125,11 +139,11 @@ export default function TableVisitor() {
                                         <Td align="center">
                                             <TableActions>
                                                 <Link
-                                                to={`/people/${visitor.id}/edit`}
-                                                className="btn-icon btn-icon-primary"
-                                                title="Editar"
+                                                    to={`/people/${visitor.id}/edit`}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Editar"
                                                 >
-                                                <Pencil size={16} />
+                                                    <Pencil size={16} />
                                                 </Link>
                                             </TableActions>
                                         </Td>
@@ -137,16 +151,16 @@ export default function TableVisitor() {
                                 ))}
                             </TableBody>
                         </Table>
-                    ):(
+                    ) : (
                         <TableEmpty message="No hay usuarios registrados." />
                     )}
                     <PaginationComponent
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={(page) => setCurrentPage(page)}
                     />
-            </TableContainer>
+                </TableContainer>
+            </div>
         </div>
-    </div>
-  )
+    )
 }

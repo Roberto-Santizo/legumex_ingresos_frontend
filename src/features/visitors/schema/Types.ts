@@ -16,10 +16,10 @@ export const responseVisitorSchema = z.object({
     company_id: z.number(),
     name: z.string(),
     document_number: z.string(),
-    document_photo_front: z.string().nullable(),
-    document_photo_back: z.string().nullable(),
     license_number: z.string().nullable(),
-    license_photo: z.string().nullable(),
+    has_document_photo_front: z.boolean().nullable().optional(),
+    has_document_photo_back: z.boolean().nullable().optional(),
+    has_license_photo: z.boolean().nullable().optional(),
     company: z.object({
         name: z.string()
     }).nullable(),

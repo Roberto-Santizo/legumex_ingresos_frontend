@@ -5,6 +5,7 @@ import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th,
 import { Pencil, Eye, X, Trash2 } from "lucide-react"
 import { toast } from "react-toastify"
 import { getVisitsAPI, deleteVisitAPI } from "@/features/visits/api/VisitAPI"
+import { getVisitorByIdAPI } from "@/features/visitors/api/VisitorsAPI"
 import PaginationComponent from "@/shared/components/PaginationComponent"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -20,7 +21,16 @@ function StatusBadge({ name }: { name?: string }) {
     return <span className={STATUS_BADGE[name] ?? "badge-info"}>{name}</span>
 }
 
-function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void }) {
+type PhotoTarget = { personId: number; photoType: "document_photo_front" | "license_photo" }
+
+function PhotoPreviewModal({ target, onClose }: { target: PhotoTarget; onClose: () => void }) {
+    const { data, isLoading } = useQuery({
+        queryKey: ["visitor-photo", target.personId, target.photoType],
+        queryFn: () => getVisitorByIdAPI(target.personId),
+    })
+
+    const url = data?.[target.photoType] ?? null
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -37,11 +47,15 @@ function PhotoPreviewModal({ url, onClose }: { url: string; onClose: () => void 
                 >
                     <X size={20} />
                 </button>
-                <img
-                    src={url}
-                    alt="Vista previa"
-                    className="w-full h-auto rounded max-h-[75vh] object-contain mt-4"
-                />
+                <div className="mt-4">
+                    {isLoading && <p className="text-center text-slate-500 py-8">Cargando foto...</p>}
+                    {!isLoading && url && (
+                        <img src={url} alt="Vista previa" className="w-full h-auto rounded max-h-[75vh] object-contain" />
+                    )}
+                    {!isLoading && !url && (
+                        <p className="text-center text-slate-400 py-8">Sin foto disponible</p>
+                    )}
+                </div>
             </div>
         </div>
     )
@@ -100,8 +114,7 @@ export default function TableVisits() {
     const canDelete = permissions.includes("visits:delete")
 
     const [currentPage, setCurrentPage] = useState(1)
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-    // ID of the visit pending delete confirmation, null when no modal open
+    const [photoTarget, setPhotoTarget] = useState<PhotoTarget | null>(null)
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
     const today = new Date().toISOString().split("T")[0]
@@ -120,8 +133,8 @@ export default function TableVisits() {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
-            {previewUrl && (
-                <PhotoPreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} />
+            {photoTarget && (
+                <PhotoPreviewModal target={photoTarget} onClose={() => setPhotoTarget(null)} />
             )}
             {confirmDeleteId !== null && (
                 <ConfirmDeleteModal
@@ -193,9 +206,9 @@ export default function TableVisits() {
                                         </Td>
                                         <Td align="center">
                                             <div className="flex items-center justify-center gap-2">
-                                                {visit.company_person?.document_photo_front ? (
+                                                {visit.company_person?.has_document_photo_front ? (
                                                     <button
-                                                        onClick={() => setPreviewUrl(visit.company_person!.document_photo_front!)}
+                                                        onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
                                                         className="btn-icon btn-icon-primary"
                                                         title="Ver DPI"
                                                     >
@@ -204,9 +217,9 @@ export default function TableVisits() {
                                                 ) : (
                                                     <span className="text-gray-400 text-sm">—</span>
                                                 )}
-                                                {visit.company_person?.license_photo ? (
+                                                {visit.company_person?.has_license_photo ? (
                                                     <button
-                                                        onClick={() => setPreviewUrl(visit.company_person!.license_photo!)}
+                                                        onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
                                                         className="btn-icon btn-icon-primary"
                                                         title="Ver Licencia"
                                                     >

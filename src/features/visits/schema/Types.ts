@@ -31,9 +31,9 @@ const companyPersonSchema = z.object({
     id: z.number(),
     name: z.string(),
     document_number: z.string(),
-    document_photo_front: z.string().nullable().optional(),
     license_number: z.string().nullable().optional(),
-    license_photo: z.string().nullable().optional(),
+    has_document_photo_front: z.boolean().nullable().optional(),
+    has_license_photo: z.boolean().nullable().optional(),
 })
 
 export const visitResponseSchema = z.object({
