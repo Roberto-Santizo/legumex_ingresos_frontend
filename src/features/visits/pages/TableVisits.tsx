@@ -205,8 +205,8 @@ export default function TableVisits() {
                                             </div>
                                         </Td>
                                         <Td align="center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                {visit.company_person?.has_document_photo_front ? (
+                                            {visit.company_person ? (
+                                                <div className="flex items-center justify-center gap-2">
                                                     <button
                                                         onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
                                                         className="btn-icon btn-icon-primary"
@@ -214,10 +214,6 @@ export default function TableVisits() {
                                                     >
                                                         <Eye size={16} />
                                                     </button>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">—</span>
-                                                )}
-                                                {visit.company_person?.has_license_photo ? (
                                                     <button
                                                         onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
                                                         className="btn-icon btn-icon-primary"
@@ -225,10 +221,10 @@ export default function TableVisits() {
                                                     >
                                                         <Eye size={16} />
                                                     </button>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">—</span>
-                                                )}
-                                            </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">—</span>
+                                            )}
                                         </Td>
                                         
                                         <Td>

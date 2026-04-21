@@ -101,39 +101,27 @@ export default function TableVisitor() {
                                         <Td>{visitor.license_number ?? "—"}</Td>
                                         <Td align="center">
                                             <div className="flex items-center justify-center gap-2">
-                                                {visitor.has_document_photo_front ? (
-                                                    <button
-                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_front" })}
-                                                        className="btn-icon btn-icon-primary"
-                                                        title="Ver DPI Frontal"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">—</span>
-                                                )}
-                                                {visitor.has_document_photo_back ? (
-                                                    <button
-                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_back" })}
-                                                        className="btn-icon btn-icon-primary"
-                                                        title="Ver DPI Posterior"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">—</span>
-                                                )}
-                                                {visitor.has_license_photo ? (
-                                                    <button
-                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "license_photo" })}
-                                                        className="btn-icon btn-icon-primary"
-                                                        title="Ver Licencia"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">—</span>
-                                                )}
+                                                <button
+                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_front" })}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Ver DPI Frontal"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_back" })}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Ver DPI Posterior"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "license_photo" })}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Ver Licencia"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
                                             </div>
                                         </Td>
                                         <Td align="center">

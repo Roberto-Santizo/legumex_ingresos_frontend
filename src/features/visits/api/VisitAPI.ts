@@ -11,7 +11,6 @@ const visitorPersonSelectSchema = z.object({ id: z.number(), name: z.string(), d
 export async function createVisitAPI(formData: CreateVisitFormData) {
     try {
         const { data } = await api.post("/visit", formData)
-        console.log('The data we sent to create a ', data)
         return data
     } catch (error) {
         if (isAxiosError(error) && error.response) {

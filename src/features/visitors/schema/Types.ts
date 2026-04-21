@@ -17,9 +17,6 @@ export const responseVisitorSchema = z.object({
     name: z.string(),
     document_number: z.string(),
     license_number: z.string().nullable(),
-    has_document_photo_front: z.boolean().nullable().optional(),
-    has_document_photo_back: z.boolean().nullable().optional(),
-    has_license_photo: z.boolean().nullable().optional(),
     company: z.object({
         name: z.string()
     }).nullable(),
