@@ -101,27 +101,36 @@ export default function TableVisitor() {
                                         <Td>{visitor.license_number ?? "—"}</Td>
                                         <Td align="center">
                                             <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_front" })}
-                                                    className="btn-icon btn-icon-primary"
-                                                    title="Ver DPI Frontal"
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_back" })}
-                                                    className="btn-icon btn-icon-primary"
-                                                    title="Ver DPI Posterior"
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "license_photo" })}
-                                                    className="btn-icon btn-icon-primary"
-                                                    title="Ver Licencia"
-                                                >
-                                                    <Eye size={16} />
-                                                </button>
+                                                {visitor.has_document_photo_front && (
+                                                    <button
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_front" })}
+                                                        className="btn-icon btn-icon-primary"
+                                                        title="Ver DPI Frontal"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                )}
+                                                {visitor.has_document_photo_back && (
+                                                    <button
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "document_photo_back" })}
+                                                        className="btn-icon btn-icon-primary"
+                                                        title="Ver DPI Posterior"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                )}
+                                                {visitor.has_license_photo && (
+                                                    <button
+                                                        onClick={() => setPhotoTarget({ personId: visitor.id, photoType: "license_photo" })}
+                                                        className="btn-icon btn-icon-primary"
+                                                        title="Ver Licencia"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                )}
+                                                {!visitor.has_document_photo_front && !visitor.has_document_photo_back && !visitor.has_license_photo && (
+                                                    <span className="text-slate-400 text-xs">Sin fotos</span>
+                                                )}
                                             </div>
                                         </Td>
                                         <Td align="center">

@@ -207,20 +207,27 @@ export default function TableVisits() {
                                         <Td align="center">
                                             {visit.company_person ? (
                                                 <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
-                                                        className="btn-icon btn-icon-primary"
-                                                        title="Ver DPI"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
-                                                        className="btn-icon btn-icon-primary"
-                                                        title="Ver Licencia"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
+                                                    {visit.company_person.has_document_photo_front && (
+                                                        <button
+                                                            onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
+                                                            className="btn-icon btn-icon-primary"
+                                                            title="Ver DPI"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    )}
+                                                    {visit.company_person.has_license_photo && (
+                                                        <button
+                                                            onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
+                                                            className="btn-icon btn-icon-primary"
+                                                            title="Ver Licencia"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    )}
+                                                    {!visit.company_person.has_document_photo_front && !visit.company_person.has_license_photo && (
+                                                        <span className="text-slate-400 text-xs">Sin fotos</span>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-400 text-sm">—</span>

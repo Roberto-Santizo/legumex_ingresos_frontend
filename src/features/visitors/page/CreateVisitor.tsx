@@ -30,6 +30,12 @@ export default function CreateVisitor() {
             return;
         const hasFront = !!formData.document_photo_front;
         const hasBack = !!formData.document_photo_back;
+        const hasLicense = !!formData.license_photo;
+
+        if (!hasFront && !hasBack && !hasLicense) {
+            toast.error("Debe subir al menos una opción de fotografía: DPI (frontal y posterior) o Licencia.");
+            return;
+        }
         if (hasFront && !hasBack) {
             toast.error("Si ingresa la foto frontal del DPI, también debe ingresar la foto posterior.");
             return;
