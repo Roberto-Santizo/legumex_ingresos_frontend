@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 import api from "@/shared/api/axios";
 import type {CreateCompanyFormData}  from "@/features/company/schema/types"
-import {getCompanyResponse,companyForSelectSchema, getCompanyByIdSchema}  from "@/features/company/schema/types"
+import {companyForSelectSchema, getCompanyByIdSchema, getCompanyResponse}  from "@/features/company/schema/types"
 
 export async function createCompanyAPI(formData: CreateCompanyFormData) {
     try {
@@ -28,6 +28,31 @@ export async function getCompanyAPI(page: number = 1) {
         }
         throw error;
   }
+}
+
+export async function getCompanyWithFiltersAPI(filters: {
+    name?: string,
+    page?: number
+}) {
+    try {
+        const limit = 10;
+        const { data } = await api.get("/company", {
+            params: {
+                limit,
+                page: filters.page,
+                name: filters.name || undefined,
+            }
+        });
+        const response = getCompanyResponse.safeParse(data);
+        if (response.success) {
+            return response.data;
+        }
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message);
+        }
+        throw error;
+    }
 }
 
 export async function getCompanyForSelectAPI() {

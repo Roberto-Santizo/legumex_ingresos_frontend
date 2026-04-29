@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Eye, X } from "lucide-react";
+import { Pencil, Eye, X, Search } from "lucide-react";
 import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable";
 import PaginationComponent from "@/shared/components/PaginationComponent";
 import { getVisitorAPI, getVisitorByIdAPI } from "../api/VisitorsAPI";
@@ -54,10 +54,25 @@ function PhotoPreviewModal({ target, onClose }: { target: PhotoTarget; onClose: 
 export default function TableVisitor() {
     const [currentPage, setCurrentPage] = useState(1)
     const [photoTarget, setPhotoTarget] = useState<PhotoTarget | null>(null)
+    const [inputs, setInputs] = useState({ name: "", document_number: "" })
+    const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "" })
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedFilters(inputs)
+            setCurrentPage(1)
+        }, 400)
+        return () => clearTimeout(timer)
+    }, [inputs.name, inputs.document_number])
 
     const { data, isLoading, isError } = useQuery({
-        queryKey: ["visitors", currentPage],
-        queryFn: () => getVisitorAPI(currentPage),
+        queryKey: ["visitors", currentPage, debouncedFilters],
+        queryFn: () => getVisitorAPI({
+            page: currentPage,
+            name: debouncedFilters.name || undefined,
+            document_number: debouncedFilters.document_number || undefined,
+        }),
+        placeholderData: (previousData) => previousData,
     })
 
     if (isLoading) return <p>Cargando visitantes</p>
@@ -73,11 +88,52 @@ export default function TableVisitor() {
             )}
             <div className="max-w-6xl w-full">
                 <TableContainer>
-                    <TableHeader
-                        title="Lista de visitantes (Proveedores, Clientes)"
-                        linkTo="/people/create"
-                        linkText="Crear Visitante"
-                    />
+                    <TableHeader title="Lista de visitantes (Proveedores, Clientes)">
+                        <Link to="/people/create" className="btn-primary whitespace-nowrap">
+                            Crear Visitante
+                        </Link>
+                    </TableHeader>
+
+                    <div className="flex flex-col sm:flex-row gap-3 mb-2">
+                        <div className="relative flex-1 mt-2 ml-2">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={inputs.name}
+                                onChange={(e) => setInputs((prev) => ({ ...prev, name: e.target.value }))}
+                                placeholder="Buscar por nombre..."
+                                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                            {inputs.name && (
+                                <button
+                                    onClick={() => setInputs((prev) => ({ ...prev, name: "" }))}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="relative flex-1 mt-2 mr-2">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={inputs.document_number}
+                                onChange={(e) => setInputs((prev) => ({ ...prev, document_number: e.target.value }))}
+                                placeholder="Buscar por DPI..."
+                                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                            {inputs.document_number && (
+                                <button
+                                    onClick={() => setInputs((prev) => ({ ...prev, document_number: "" }))}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
                     {visitors.length > 0 ? (
                         <Table>
                             <TableHead>
@@ -149,12 +205,13 @@ export default function TableVisitor() {
                             </TableBody>
                         </Table>
                     ) : (
-                        <TableEmpty message="No hay usuarios registrados." />
+                        <TableEmpty message="No hay visitantes registrados." />
                     )}
+
                     <PaginationComponent
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page) => setCurrentPage(page)}
+                        onPageChange={setCurrentPage}
                     />
                 </TableContainer>
             </div>

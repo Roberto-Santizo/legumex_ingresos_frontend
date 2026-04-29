@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable"
-import { Pencil, Eye, X, Trash2 } from "lucide-react"
+import { Pencil, Eye, X, Trash2, Search } from "lucide-react"
 import { toast } from "react-toastify"
 import { getVisitsAPI, deleteVisitAPI } from "@/features/visits/api/VisitAPI"
 import { getVisitorByIdAPI } from "@/features/visitors/api/VisitorsAPI"
@@ -119,10 +119,25 @@ export default function TableVisits() {
 
     const today = new Date().toISOString().split("T")[0]
     const [selectedDate, setSelectedDate] = useState(today)
+    const [inputs, setInputs] = useState({ name: "", document_number: "" })
+    const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "" })
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedFilters(inputs)
+            setCurrentPage(1)
+        }, 400)
+        return () => clearTimeout(timer)
+    }, [inputs])
 
     const { data, isLoading, isError } = useQuery({
-        queryKey: ["visits", selectedDate, currentPage],
-        queryFn: () => getVisitsAPI(currentPage, { date: selectedDate }),
+        queryKey: ["visits", selectedDate, currentPage, debouncedFilters],
+        queryFn: () => getVisitsAPI(currentPage, {
+            date: selectedDate,
+            name: debouncedFilters.name || undefined,
+            document_number: debouncedFilters.document_number || undefined,
+        }),
+        placeholderData: (previousData) => previousData,
     })
 
     if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
@@ -150,7 +165,7 @@ export default function TableVisits() {
                         linkText="Crear Visita"
                     />
 
-                    <div className="px-6 py-3 flex items-center gap-3 border-b border-slate-200">
+                    <div className="px-6 py-3 flex flex-wrap items-center gap-3 border-b border-slate-200">
                         <label className="text-sm font-semibold text-slate-600">Fecha:</label>
                         <input
                             type="date"
@@ -166,6 +181,44 @@ export default function TableVisits() {
                                 Hoy
                             </button>
                         )}
+
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={inputs.name}
+                                onChange={e => setInputs(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="Buscar por nombre..."
+                                className="pl-8 pr-7 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-48"
+                            />
+                            {inputs.name && (
+                                <button
+                                    onClick={() => setInputs(prev => ({ ...prev, name: "" }))}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={inputs.document_number}
+                                onChange={e => setInputs(prev => ({ ...prev, document_number: e.target.value }))}
+                                placeholder="Buscar por DPI..."
+                                className="pl-8 pr-7 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-44"
+                            />
+                            {inputs.document_number && (
+                                <button
+                                    onClick={() => setInputs(prev => ({ ...prev, document_number: "" }))}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {list.length > 0 ? (

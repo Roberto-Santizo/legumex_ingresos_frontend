@@ -16,10 +16,22 @@ export async function createVisitorAPI(formData: CreateVisitorFormData ) {
     }
 }
 
-export async function getVisitorAPI(page: number = 1) {
+export async function getVisitorAPI(params: {
+    page?: number;
+    name?: string;
+    document_number?: string;
+} = {}) {
     try {
+        const { page = 1, name, document_number } = params
         const limit = 10
-        const {data} = await api.get("/company-person", {params: {page, limit}})
+        const {data} = await api.get("/company-person", {
+            params: {
+                page,
+                limit,
+                name: name || undefined,
+                document_number: document_number || undefined,
+            }
+        })
         const response = getVisitor.parse(data);
         return response;
 

@@ -30,7 +30,7 @@ export async function getVisitsTodayAPI() {
     }
 }
 
-export async function getVisitsAPI(page: number = 1, filters?: { date?: string; status?: string }) {
+export async function getVisitsAPI(page: number = 1, filters?: { date?: string; status?: string; name?: string; document_number?: string }) {
     try {
         const limit = 10;
         const { data } = await api.get("/visit", { params: { page, limit, ...filters } })
