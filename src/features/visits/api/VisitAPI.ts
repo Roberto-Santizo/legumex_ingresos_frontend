@@ -97,16 +97,10 @@ export async function cancelVisitAPI(visitId: number) {
 
 // Obtener visitantes (empresas/proveedores) para el select de crear visita
 export async function getVisitorsForSelectAPI() {
-    try {
-        const { data } = await api.get("/company", { params: { all: true } })
-        const parsed = visitorSelectSchema.array().safeParse(data.response)
-        if (!parsed.success) throw new Error("Formato inválido de visitante para el select")
-        return parsed.data
-    } catch (error) {
-        if (isAxiosError(error) && error.response) {
-            throw new Error(error.message)
-        }
-    }
+    const { data } = await api.get("/company", { params: { all: true } })
+    const parsed = visitorSelectSchema.array().safeParse(data.response)
+    if (!parsed.success) throw new Error("Formato inválido de visitante para el select")
+    return parsed.data
 }
 
 export async function updateVisitAPI({ visitId, formData }: { visitId: number; formData: CreateVisitFormData }) {
