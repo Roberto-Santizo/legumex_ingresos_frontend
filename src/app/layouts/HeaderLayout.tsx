@@ -1,4 +1,4 @@
-import {Menu,X,Bell, Settings,User,UserCircle,LogOut,ChevronRight,AlertTriangle,} from "lucide-react";
+import {Menu,X,Bell, Settings,User,UserCircle,LogOut,ChevronRight,} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import {useAuth} from "@/hooks/useAuth"
 import {useGreetingGT} from "@/shared/helpers/useGreetingGT"
@@ -12,7 +12,6 @@ type HeaderProps = {
 
 export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMobileMenuOpen,}: HeaderProps) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(true);
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const greeting = useGreetingGT(); //This is to greet the user depending on the time of day
@@ -49,35 +48,6 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
   };
 
   return (
-    <>
-    {bannerVisible && (
-      <div className="fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-red-700 via-red-600 to-red-700 shadow-lg border-b border-red-800">
-        <div className="flex items-center justify-between px-4 lg:px-6 py-2.5 gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-semibold text-sm leading-tight">
-                Aviso importante — Compatibilidad con Chrome
-              </p>
-              <p className="text-red-100 text-xs mt-0.5 leading-snug">
-                Chrome actualizo sus politicas y puede generar errores al editar datos. Si presenta problemas, use{" "}
-                <span className="font-semibold text-white">Edge, Firefox u otro navegador</span>.{" "}
-                Estamos trabajando para solucionarlo.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setBannerVisible(false)}
-            className="shrink-0 w-7 h-7 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full transition-colors"
-            aria-label="Cerrar aviso"
-          >
-            <X className="w-3.5 h-3.5 text-white" />
-          </button>
-        </div>
-      </div>
-    )}
     <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 z-50 shadow-xl">
       <div className="h-full flex items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-4">
@@ -176,6 +146,5 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
         </div>
       </div>
     </header>
-    </>
   );
 }
