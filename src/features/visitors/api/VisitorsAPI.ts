@@ -46,11 +46,15 @@ export async function getVisitorByIdAPI(peopleId:number) {
     try {
         const {data} = await api.get(`/company-person/${peopleId}`)
         const response = getVisitorByIdSchema.safeParse(data.data)
+        if(!response.success){
+            throw new Error("Error al validar los datos del visitante")
+        }
         return response.data
     } catch (error) {
         if(isAxiosError(error)&& error.response){
             throw new Error(error.message)
         }
+        throw error
     }
 }
 

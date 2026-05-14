@@ -33,18 +33,13 @@ export default function EditVisitorForm({data, visitorId}:EditVisitorProps) {
         },
         onSuccess(data) {
             queryClient.invalidateQueries({queryKey:['visitors']})
-            queryClient.invalidateQueries({queryKey:['editVisitor', visitorId]})
             queryClient.invalidateQueries({queryKey:['visitor-persons-select']})
-            toast.success(data.message)
+            toast.success(data?.message)
             navigate("/people")
         },
     })
     const handleForm = (formData: CreateVisitorFormData) =>{
-        const data = {
-            formData,
-            visitorId
-        }
-        mutate(data)
+        mutate({ formData, visitorId })
     }
   if(data) return (
         <div className="form-page">
