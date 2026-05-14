@@ -36,7 +36,7 @@ export default function AppLayout() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-white font-semibold text-sm leading-tight">
-                    Aviso importante — Compatibilidad con Chrome
+                    Aviso importante — Compatibilidad con Chrome <span className="font-bold">Mensaje dejado por Luis Gonzalez (IT)</span>
                   </p>
                   <p className="text-red-100 text-xs mt-0.5 leading-snug">
                     Chrome actualizo sus politicas y puede generar errores al editar datos. Si presenta problemas, use{" "}
