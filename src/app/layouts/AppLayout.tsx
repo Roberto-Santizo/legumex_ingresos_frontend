@@ -34,16 +34,17 @@ export default function AppLayout() {
                 <div className="shrink-0 w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-white" />
                 </div>
-                <div className="min-w-0">
+                 // This is a warning banner that informs users about any important information regarding the application.
+                {/* <div className="min-w-0">
                   <p className="text-white font-semibold text-sm leading-tight">
-                    Aviso importante — Compatibilidad con Chrome <span className="font-bold">Mensaje dejado por Luis Gonzalez (IT)</span>
+                    Aviso importante — Compatibilidad con Chrome <span className="font-bold">Mensaje dejado por(IT)</span>
                   </p>
                   <p className="text-red-100 text-xs mt-0.5 leading-snug">
                     Chrome actualizo sus politicas y puede generar errores al editar datos. Si presenta problemas, use{" "}
                     <span className="font-semibold text-white">Edge, Firefox u otro navegador</span>.{" "}
                     Estamos trabajando para solucionarlo.
                   </p>
-                </div>
+                </div> */}
               </div>
               <button
                 onClick={() => setBannerVisible(false)}
