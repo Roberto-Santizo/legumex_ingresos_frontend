@@ -71,6 +71,7 @@ export default function CompanyTable() {
                   <TableRow>
                     <Th>ID</Th>
                     <Th>Nombre de la Empresa</Th>
+                    <Th>Empresa Creada Por:</Th>
                     <Th>Acciones</Th>
                   </TableRow>
                 </TableHead>
@@ -79,6 +80,7 @@ export default function CompanyTable() {
                     <TableRow key={company.id}>
                       <Td>{company.id}</Td>
                       <Td>{company.name}</Td>
+                      <Td>{company.created_by ?? "—"}</Td>
                       <Td align="center">
                         <TableActions>
                           <Link

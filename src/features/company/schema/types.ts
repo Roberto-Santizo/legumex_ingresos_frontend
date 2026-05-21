@@ -7,7 +7,8 @@ export const createCompany = z.object({
 
 export const resposeCompany = z.object({
     id: z.number(),
-    name: z.string()
+    name: z.string(),
+    created_by: z.string().nullable().optional(),
 })
 
 export const companyForSelectSchema = z.object({
