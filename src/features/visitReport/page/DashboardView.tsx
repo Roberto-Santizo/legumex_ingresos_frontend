@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,ResponsiveContainer,} from "recharts"
-import {Users, UserCheck, Building2, Clock, CheckCircle, XCircle, CalendarDays, FileDown,} from "lucide-react"
+import {Users, UserCheck, Building2, Clock, CheckCircle, XCircle, CalendarDays, FileDown} from "lucide-react"
 import { getDashboardSummaryAPI, getInPlantAtAPI, getVisitsByCompanyAPI } from "@/features/visitReport/api/ReportsAPI"
 import { ExcelReportAPI } from "@/features/visitReport/api/ExcelReportAPI"
+import DashboardTabs from "@/shared/components/DashboardTabs"
 
 const TODAY = new Date().toISOString().split("T")[0]
 
@@ -92,15 +93,7 @@ export default function DashboardView() {
         <div className="min-h-screen bg-[#f8fafc] p-6 space-y-8">
 
             {/* ── Page title ─────────────────────────────────────────── */}
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
-                    <CalendarDays size={20} className="text-white" />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-                    <p className="text-sm text-slate-500">Control de acceso a planta</p>
-                </div>
-            </div>
+            <DashboardTabs />
 
             {/* ── KPI Section ────────────────────────────────────────── */}
             <section>

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Spinner } from "@/shared/components/Spinner";
 import { useQuery } from "@tanstack/react-query";
@@ -6,9 +7,10 @@ import { Pencil, Search, X } from "lucide-react";
 
 import { Td, TableHead, TableContainer, TableHeader, Table, TableBody, TableRow, Th, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable";
 import PaginationComponent from "@/shared/components/PaginationComponent";
-import { getCompanyWithFiltersAPI } from "../api/companyAPI";
+import {getEquipmentWithFiltersAPI} from "../api/EquipmentAPI"
 
-export default function CompanyTable() {
+
+export default function TableEquipment() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -22,8 +24,8 @@ export default function CompanyTable() {
   }, [searchInput]);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["companies", currentPage, debouncedSearch],
-    queryFn: () => getCompanyWithFiltersAPI({
+    queryKey: ["equipments", currentPage, debouncedSearch],
+    queryFn: () => getEquipmentWithFiltersAPI({
       page: currentPage,
       name: debouncedSearch || undefined,
     }),
@@ -33,16 +35,16 @@ export default function CompanyTable() {
   if (isLoading) return <Spinner fullScreen />;
   if (isError) return <p>Error al cargar los datos.</p>;
 
-  const companies = data?.response || [];
+  const equipments = data?.response || [];
   const totalPages = data?.lastPage || 1;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
       <div className="max-w-6xl w-full">
         <TableContainer className="table-container">
-          <TableHeader title="Lista de empresas">
-            <Link to="/company/create" className="btn-primary whitespace-nowrap">
-              Crear empresa
+          <TableHeader title="Lista de equipos">
+            <Link to="/equipment/create" className="btn-primary whitespace-nowrap">
+              Crear Equipo
             </Link>
           </TableHeader>
 
@@ -66,26 +68,26 @@ export default function CompanyTable() {
           </div>
 
           <div className="overflow-x-auto">
-            {companies.length > 0 ? (
+            {equipments.length > 0 ? (
               <Table className="table">
                 <TableHead>
                   <TableRow>
                     <Th>ID</Th>
-                    <Th>Nombre de la Empresa</Th>
-                    <Th>Empresa Creada Por:</Th>
+                    <Th>Nombre del Equipo</Th>
+                    <Th>Equipo Creada Por:</Th>
                     <Th>Acciones</Th>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {companies.map((company) => (
-                    <TableRow key={company.id}>
-                      <Td>{company.id}</Td>
-                      <Td>{company.name}</Td>
-                      <Td>{company.created_by ?? "—"}</Td>
+                  {equipments.map((equipment) => (
+                    <TableRow key={equipment.equipment_id}>
+                      <Td>{equipment.equipment_id}</Td>
+                      <Td>{equipment.equipment_name}</Td>
+                      <Td>{equipment.created_by ?? "—"}</Td>
                       <Td align="center">
                         <TableActions>
                           <Link
-                            to={`/company/${company.id}/edit`}
+                            to={`/equipment/${equipment.equipment_id}/edit`}
                             className="btn-icon btn-icon-primary"
                             title="Editar"
                           >
@@ -98,7 +100,7 @@ export default function CompanyTable() {
                 </TableBody>
               </Table>
             ) : (
-              <TableEmpty message="No hay empresas registradas." />
+              <TableEmpty message="No hay equipos registradas." />
             )}
           </div>
 

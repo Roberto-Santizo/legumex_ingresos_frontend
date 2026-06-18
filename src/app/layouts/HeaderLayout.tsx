@@ -2,6 +2,7 @@ import {Menu,X,Bell, Settings,User,UserCircle,LogOut,ChevronRight,} from "lucide
 import { useState, useRef, useEffect } from "react";
 import {useAuth} from "@/hooks/useAuth"
 import {useGreetingGT} from "@/shared/helpers/useGreetingGT"
+import MundialMarquee from "@/app/layouts/WorldHeadlines";
 
 type HeaderProps = {
   sidebarOpen: boolean;
@@ -14,7 +15,7 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
-  const greeting = useGreetingGT(); //This is to greet the user depending on the time of day
+  const greetingMessage = useGreetingGT();
 
   useEffect(() => {
     const handlePointerOutside = (e: MouseEvent | TouchEvent) => {
@@ -66,16 +67,17 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
           </button>
 
           <div className="flex items-center gap-3">
-            <div >
+            {/* <div >
               <img src= {import.meta.env.VITE_IMAGE_LOGO} alt="LegumexLogo" className="w-20 h-12 text-white" />
-            </div>
+            </div> */}
             <div className="hidden sm:block">
               <h1 className="text-lx font-bold text-white tracking-tight">
                 Recursos Humanos
               </h1>
-              <p className="text-xl text-slate-400 font-medium">
+              {/* <p className="text-xl text-slate-400 font-medium">
                 ⭐“Cada día es una oportunidad para hacer las cosas mejor.”⭐
-              </p>
+              </p> */}
+                <MundialMarquee />
             </div>
           </div>
         </div>
@@ -102,7 +104,7 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
             >
               <div className="hidden lg:block text-right">
                 <p className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
-                  {greeting}, {user?.name}
+                  {greetingMessage}, {user?.name}
                 </p>
                 <p className="text-xs text-amber-400 font-medium">
                   {user?.role}

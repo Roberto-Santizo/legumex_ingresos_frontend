@@ -5,8 +5,7 @@ import { Pencil } from "lucide-react";
 import PaginationComponent from "@/shared/components/PaginationComponent";
 import {TableContainer,TableHeader, Table,TableHead,TableBody,TableRow,Th,Td,TableEmpty,TableActions,} from "@/shared/components/ui/StyledTable";
 import { getAgentAPI } from "../api/agentAPI";
-
-
+import { Spinner } from "@/shared/components/Spinner";
 
 export default function TableAgent() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,7 +18,7 @@ export default function TableAgent() {
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
-  if (isLoading) return <p>Cargando agentes...</p>;
+  if (isLoading) return <Spinner fullScreen />;
   if (isError) return <p>Error al cargar los datos.</p>;
 
   const agents = data?.response || [];

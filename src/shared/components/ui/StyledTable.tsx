@@ -32,6 +32,7 @@ interface TableBodyProps {
 interface TableRowProps {
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
 }
 
 interface TableCellProps {
@@ -88,8 +89,8 @@ const TableBody = ({ children }: TableBodyProps) => (
   <tbody>{children}</tbody>
 );
 
-const TableRow = ({ children, className = "" }: TableRowProps) => (
-  <tr className={className}>{children}</tr>
+const TableRow = ({ children, className = "", onClick }: TableRowProps) => (
+  <tr className={className} onClick={onClick}>{children}</tr>
 );
 
 const Th = ({ children, align = "left", className = "" }: TableCellProps) => {

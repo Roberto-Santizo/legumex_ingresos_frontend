@@ -13,24 +13,32 @@ type Props = {
 
 // Group permissions by module
 const MODULE_LABELS: Record<string, string> = {
-  users:       "Usuarios",
-  roles:       "Roles",
-  agents:      "Agentes",
-  companies:   "Empresas",
-  departments: "Departamentos",
-  visitors:    "Visitantes",
-  visits:      "Visitas",
-  reports:     "Reportes",
+  users:               "Usuarios",
+  roles:               "Roles",
+  agents:              "Agentes",
+  companies:           "Empresas",
+  people:              "Personas de empresa",
+  departments:         "Departamentos",
+  visitors:            "Visitantes",
+  visits:              "Visitas",
+  visitsReports:       "Reportes de visitas",
+  equipmentReports:    "Reportes de equipo",
+  equipment:           "Equipo de trabajo",
+  employeeBenefited:   "Empleados beneficiados",
+  deliveryTransaction: "Entrega de equipo",
 };
 
 const ACTION_LABELS: Record<string, string> = {
-  "view":       "Ver",
-  "view:all":   "Ver todas",
-  "create":     "Crear",
-  "edit":       "Editar",
-  "checkin":    "Check-in",
-  "checkout":   "Check-out",
-  "cancel":     "Cancelar",
+  "view":           "Ver",
+  "view:all":       "Ver todas",
+  "create":         "Crear",
+  "edit":           "Editar",
+  "delete":         "Eliminar",
+  "checkin":        "Check-in",
+  "checkout":       "Check-out",
+  "cancel":         "Cancelar",
+  "updateEquipment": "Editar",
+  "finalPhoto":     "Subir foto final",
 };
 
 export default function RolePermissionsForm({ roleId }: Props) {

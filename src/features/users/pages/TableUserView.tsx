@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Spinner } from "@/shared/components/Spinner";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
@@ -17,7 +18,7 @@ export default function UserTableView() {
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
-  if (isLoading) return <p>Cargando usuarios...</p>;
+  if (isLoading) return <Spinner fullScreen />;
   if (isError) return <p>Error al cargar los datos.</p>;
 
   const users = data?.response || [];

@@ -4,6 +4,8 @@ import { isAxiosError } from "axios";
 import type { LoginRequest,LoginResponse } from "@/features/auth/schemas/types";
 import { loginRequestSchema,loginResponseSchema } from "@/features/auth/schemas/types";
 
+export type LoginApiError = Error & { status: number };
+
 export async function loginApi(formData: LoginRequest): Promise<LoginResponse> {
   try {
     const parsedData = loginRequestSchema.parse(formData);
@@ -12,7 +14,9 @@ export async function loginApi(formData: LoginRequest): Promise<LoginResponse> {
     return parsedResponse;
   } catch (error) {
     if (isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message);
+      const err = new Error(error.response.data.message) as LoginApiError;
+      err.status = error.response.status;
+      throw err;
     }
     throw error;
   }

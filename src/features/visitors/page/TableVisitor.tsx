@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Spinner } from "@/shared/components/Spinner";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Eye, X, Search } from "lucide-react";
@@ -75,7 +76,7 @@ export default function TableVisitor() {
         placeholderData: (previousData) => previousData,
     })
 
-    if (isLoading) return <p>Cargando visitantes</p>
+    if (isLoading) return <Spinner fullScreen />
     if (isError) return <p>Error al cargar los datos</p>
 
     const visitors = data?.response || []

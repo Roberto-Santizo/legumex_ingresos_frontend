@@ -15,6 +15,7 @@ export const loginResponseSchema = z.object({
     permissions: z.array(z.string()),
   }),
   token: z.string(),
+  refreshToken: z.string(),
 });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;

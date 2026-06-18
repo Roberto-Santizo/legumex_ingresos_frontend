@@ -1,15 +1,22 @@
-import { User, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { User, Lock, Eye, EyeOff, LogIn, ShieldAlert } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { LoginRequest } from "@/features/auth/schemas/types";
+import type { LoginApiError } from "@/features/auth/api/LoginAPI";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { ErrorMessage } from "@/shared/components/ErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
 
+const isLoginApiError = (error: unknown): error is LoginApiError =>
+  error instanceof Error && "status" in error;
+
 export default function LoginView() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [lockSecondsLeft, setLockSecondsLeft] = useState(0);
   const { login } = useAuth();
+
+  const isLocked = lockSecondsLeft > 0;
 
   const {
     register,
@@ -22,12 +29,35 @@ export default function LoginView() {
     localStorage.clear();
   }, []);
 
+  // Countdown cuando la cuenta está bloqueada
+  useEffect(() => {
+    if (!isLocked) return;
+    const interval = setInterval(() => {
+      setLockSecondsLeft((secondsLeft) => {
+        if (secondsLeft <= 1) { clearInterval(interval); return 0; }
+        return secondsLeft - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isLocked]);
+
+  const formatCountdown = (seconds: number) => {
+    const minutesText = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const secondsText = (seconds % 60).toString().padStart(2, "0");
+    return `${minutesText}:${secondsText}`;
+  };
+
   const onSubmit = async (formData: LoginRequest) => {
     setIsPending(true);
     try {
       await login(formData);
-    } catch (error: any) {
-      toast.error(error?.message ?? "Error al iniciar sesión");
+    } catch (error) {
+      if (isLoginApiError(error) && error.status === 423) {
+        const match = error.message.match(/(\d+) minuto/);
+        const minutes = match ? parseInt(match[1]) : 15;
+        setLockSecondsLeft(minutes * 60);
+      }
+      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión");
     } finally {
       setIsPending(false);
     }
@@ -146,13 +176,22 @@ export default function LoginView() {
 
               <button
                 type="submit"
-                disabled={isPending}
-                className="w-full bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white font-semibold py-3.5 text-base rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                disabled={isPending || isLocked}
+                className={`w-full text-white font-semibold py-3.5 text-base rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+                  isLocked
+                    ? "bg-slate-400 shadow-none"
+                    : "bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                }`}
               >
                 {isPending ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>Iniciando sesión...</span>
+                  </>
+                ) : isLocked ? (
+                  <>
+                    <ShieldAlert className="w-5 h-5" />
+                    <span>Bloqueado — {formatCountdown(lockSecondsLeft)}</span>
                   </>
                 ) : (
                   <>

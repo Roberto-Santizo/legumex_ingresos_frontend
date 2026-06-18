@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { Spinner } from "@/shared/components/Spinner"
 import { useParams, Navigate, Link } from "react-router-dom"
 
 import EditRoleForm from "../components/EditRoleForm"
@@ -15,7 +16,7 @@ export default function EditRole() {
         retry: false
     })
 
-    if (isLoading) return <p>Cargando...</p>
+    if (isLoading) return <Spinner fullScreen />
     if (isError) return <Navigate to={'/404'} />
     if (!data) return null
 

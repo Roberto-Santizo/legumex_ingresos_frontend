@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Spinner } from "@/shared/components/Spinner";
 import { useQuery } from "@tanstack/react-query";
 import { getRoleAPI } from "@/features/roles/api/RolAPI";
 import PaginationComponent from "@/shared/components/PaginationComponent";
@@ -16,7 +17,7 @@ export default function UserTableView() {
     queryFn: () => getRoleAPI(currentPage),
   });
 
-  if (isLoading) return <p>Cargando roles...</p>;
+  if (isLoading) return <Spinner fullScreen />;
   if (isError) return <p>Error al cargar los datos.</p>;
 
   const roles = data?.response || [];

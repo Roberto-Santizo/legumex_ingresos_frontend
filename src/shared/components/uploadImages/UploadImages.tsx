@@ -51,7 +51,7 @@ export default function UploadImagenes({ onClose, onSave }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-xl bg-white p-6">
 
         <h2 className="mb-4 text-lg font-semibold">Tomar o subir imagen</h2>

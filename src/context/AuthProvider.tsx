@@ -44,6 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Store new token and user data
       setToken(data.token);
       localStorage.setItem("token", data.token);
+      localStorage.setItem("refreshToken", data.refreshToken);
       setUser(data.data);
       const userPermissions = data.data.permissions ?? []
       setPermissions(userPermissions);
@@ -52,13 +53,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Redirigir al primer módulo accesible según permisos
       const NAV_ORDER = [
         { permission: "visits:view",      path: "/visits" },
-        { permission: "reports:view",     path: "/report" },
+        { permission: "visitsReports:view",     path: "/report" },
         { permission: "visitors:view",    path: "/visitor" },
         { permission: "users:view",       path: "/user" },
         { permission: "roles:view",       path: "/role" },
         { permission: "agents:view",      path: "/agent" },
         { permission: "companies:view",   path: "/company" },
         { permission: "departments:view", path: "/department" },
+        { permission: "equipment:view",   path: "/equipment" },
+        { permission: "employeeBenefited:view",   path: "/employeeBenefited" },
+        { permission: "equipmentReports:view",    path: "/equipment-dashboard" },
       ];
       const firstRoute = NAV_ORDER.find(r => userPermissions.includes(r.permission));
       navigate(firstRoute?.path ?? "/403", { replace: true });
@@ -79,6 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // 3. Clear localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("permissions");
 
     // 4. Navigate to login and replace history
@@ -101,9 +106,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const data = await checkStatusAPI();
         setUser(data.data);
-        const freshPermissions = data.data.permissions ?? []
+        const freshPermissions = data.data.permissions ?? [];
         setPermissions(freshPermissions);
         localStorage.setItem("permissions", JSON.stringify(freshPermissions));
+        if (data.token) {
+          setToken(data.token);
+          localStorage.setItem("token", data.token);
+        }
+        if (data.refreshToken) {
+          localStorage.setItem("refreshToken", data.refreshToken);
+        }
       } catch (error) {
         // If the token is invalid, perform a full logout
         console.error("Invalid session:", error);
