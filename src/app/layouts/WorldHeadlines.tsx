@@ -1,5 +1,3 @@
-// Marquee del Mundial 2026: nombres de selecciones en movimiento + label + frase cálida.
-// Sin APIs ni estado, solo animación CSS. Drop-in para el header.
 
 const TEAMS = [
   "México",
