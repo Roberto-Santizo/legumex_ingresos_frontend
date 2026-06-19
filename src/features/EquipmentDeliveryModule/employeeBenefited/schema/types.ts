@@ -13,6 +13,8 @@ export const externalEmployeeSchema = z.object({
     code: z.string(),
     position: z.string(),
     deparment: departmentSchema,
+    existing_status: z.enum(['DELIVER_EQUIPMENT', 'FINAL_PHOTO', 'COMPLETED']).nullable().optional(),
+    last_delivery_date: z.string().nullable().optional(),
 })
 
 export const externalEmployeeListSchema = z.array(externalEmployeeSchema)

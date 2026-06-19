@@ -240,13 +240,12 @@
 .form-page {
   min-height: 100vh;
   background-color: var(--color-bg-primary);
-  padding: 3rem 1rem;
+  padding: 2rem 1rem;
 }
 
 @media (min-width: 640px) {
   .form-page {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding: 3rem 1.5rem;
   }
 }
 
@@ -271,18 +270,31 @@
 /* Title section centered above the form */
 .form-page-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .form-page-header {
+    margin-bottom: 2rem;
+  }
 }
 
 /* Gradient title text */
 .form-page-title {
-  font-size: 2.25rem; /* text-4xl */
+  font-size: 1.5rem; /* text-2xl */
   font-weight: 700;
   background: linear-gradient(to right, var(--color-primary-dark), var(--color-primary));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .form-page-title {
+    font-size: 2.25rem; /* text-4xl */
+    margin-bottom: 0.75rem;
+  }
 }
 
 /* ============================================
@@ -299,7 +311,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background-color: white;
   color: var(--color-primary-dark);
   font-weight: 600;
@@ -309,6 +321,12 @@
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .form-nav-back {
+    padding: 0.75rem 1.5rem;
+  }
 }
 
 .form-nav-back:hover {
@@ -343,10 +361,17 @@
 
 /* Inner padding for the form content */
 .form-card-body {
-  padding: 2rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .form-card-body {
+    padding: 2rem;
+    gap: 1.5rem;
+  }
 }
 
 /* ============================================

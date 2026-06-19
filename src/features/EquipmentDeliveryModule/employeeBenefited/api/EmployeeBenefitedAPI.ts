@@ -46,7 +46,19 @@ export async function getEmployeeBenefitedFilterAPI(filters:{name?: string, page
 export async function findOrCreateEmployeeBenefitedAPI(employee: ExternalEmployee & { photo_url?: string }) {
     try {
         const { data } = await api.post("/employee-benefited/find-or-create", employee);
-        return data.data as { employee_benefited_id: number };
+        return data as { data: { employee_benefited_id: number }; reopened: boolean };
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message);
+        }
+        throw error;
+    }
+}
+
+export async function deleteEmployeeBenefitedAPI(employeeBenefitedId: number) {
+    try {
+        const { data } = await api.delete(`/employee-benefited/${employeeBenefitedId}`);
+        return data as { message: string };
     } catch (error) {
         if (isAxiosError(error) && error.response) {
             throw new Error(error.response.data.message);

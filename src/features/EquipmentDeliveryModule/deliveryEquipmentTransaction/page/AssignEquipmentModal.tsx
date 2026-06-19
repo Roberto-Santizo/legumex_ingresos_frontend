@@ -81,12 +81,12 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
     }
 
     return (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-2 sm:p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b shrink-0">
-                    <h2 className="text-lg font-semibold text-gray-800">Asignar Material de Trabajo</h2>
+                <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b shrink-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-800">Asignar Material de Trabajo</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -95,11 +95,11 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                     </button>
                 </div>
 
-                <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5">
 
                     {/* Employee Card */}
-                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                        <div className="w-36 h-36 rounded-xl bg-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-200 text-center sm:text-left">
+                        <div className="w-20 h-20 sm:w-36 sm:h-36 rounded-xl bg-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
                             {employee.photo_url ? (
                                 <img
                                     src={employee.photo_url}
@@ -107,14 +107,14 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <User size={56} className="text-slate-400" />
+                                <User className="w-10 h-10 sm:w-14 sm:h-14 text-slate-400" />
                             )}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 w-full">
                             <p className="text-base font-semibold text-gray-900 truncate">
                                 {employee.employee_name}
                             </p>
-                            <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1 text-sm text-gray-500">
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-0.5 mt-1 text-sm text-gray-500">
                                 {employee.employee_code && (
                                     <span>Código: {employee.employee_code}</span>
                                 )}
@@ -151,7 +151,7 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                                         className="p-3 border border-gray-200 rounded-xl bg-gray-50 space-y-2"
                                     >
                                         {/* Fila 1: equipo + condición + eliminar */}
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col sm:flex-row gap-2">
                                             <div className="flex-1">
                                                 <Select
                                                     options={equipmentOptions}
@@ -167,30 +167,32 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                                                 />
                                             </div>
 
-                                            <select
-                                                value={item.equipment_condition}
-                                                onChange={(event) =>
-                                                    updateItem(index, 'equipment_condition', event.target.value as 'NEW' | 'USED')
-                                                }
-                                                className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                                            >
-                                                <option value="NEW">Nuevo</option>
-                                                <option value="USED">Usado</option>
-                                            </select>
-
-                                            {items.length > 1 && (
-                                                <button
-                                                    onClick={() => removeItem(index)}
-                                                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Eliminar"
+                                            <div className="flex gap-2">
+                                                <select
+                                                    value={item.equipment_condition}
+                                                    onChange={(event) =>
+                                                        updateItem(index, 'equipment_condition', event.target.value as 'NEW' | 'USED')
+                                                    }
+                                                    className="flex-1 sm:w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                                 >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            )}
+                                                    <option value="NEW">Nuevo</option>
+                                                    <option value="USED">Usado</option>
+                                                </select>
+
+                                                {items.length > 1 && (
+                                                    <button
+                                                        onClick={() => removeItem(index)}
+                                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {/* Fila 2: tipo de entrega + is_paid condicional */}
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex flex-wrap items-center gap-3">
                                             <select
                                                 value={item.delivery_equipment_type}
                                                 onChange={(event) => {
@@ -200,7 +202,7 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                                                         updateItem(index, 'is_paid', false)
                                                     }
                                                 }}
-                                                className="w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                                className="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                             >
                                                 <option value="DELIVERED">Entrega</option>
                                                 <option value="CHANGE">Cambio</option>
@@ -247,7 +249,7 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
+                <div className="flex justify-end gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t shrink-0">
                     <button
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"

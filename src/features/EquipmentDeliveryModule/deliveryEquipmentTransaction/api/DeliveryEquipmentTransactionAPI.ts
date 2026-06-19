@@ -1,6 +1,6 @@
 import api from "shared/api/axios.ts"
 import { isAxiosError } from "axios"
-import type { CreateTransactionPayload, UploadFinalPhotoPayload } from "../schema/types"
+import { deliveryHistoryListSchema, type CreateTransactionPayload, type UploadFinalPhotoPayload } from "../schema/types"
 
 export async function createEquipmentTransactionAPI(payload: CreateTransactionPayload) {
     try {
@@ -21,6 +21,22 @@ export async function uploadEmployeeFinalPhotoAPI({ employee_benefited_id, photo
             { photo_base64 }
         )
         return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data?.message)
+        }
+        throw error
+    }
+}
+
+export async function getEmployeeDeliveryHistoryAPI(employeeBenefitedId: number) {
+    try {
+        const { data } = await api.get(`/delivery-equipment-transaction/by-employee/${employeeBenefitedId}`)
+        const response = deliveryHistoryListSchema.safeParse(data.data)
+        if (!response.success) {
+            throw new Error("Respuesta del servidor inesperada")
+        }
+        return response.data
     } catch (error) {
         if (isAxiosError(error) && error.response) {
             throw new Error(error.response.data?.message)

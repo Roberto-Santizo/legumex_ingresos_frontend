@@ -165,31 +165,33 @@ export default function TableVisits() {
                         linkText="Crear Visita"
                     />
 
-                    <div className="px-6 py-3 flex flex-wrap items-center gap-3 border-b border-slate-200">
-                        <label className="text-sm font-semibold text-slate-600">Fecha:</label>
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={e => { setSelectedDate(e.target.value); setCurrentPage(1) }}
-                            className="form-input form-input-normal text-sm py-1 w-48"
-                        />
-                        {selectedDate !== today && (
-                            <button
-                                onClick={() => setSelectedDate(today)}
-                                className="text-xs text-amber-600 hover:underline"
-                            >
-                                Hoy
-                            </button>
-                        )}
+                    <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 border-b border-slate-200">
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm font-semibold text-slate-600 whitespace-nowrap">Fecha:</label>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={e => { setSelectedDate(e.target.value); setCurrentPage(1) }}
+                                className="form-input form-input-normal text-sm py-1 flex-1 sm:w-48 sm:flex-initial"
+                            />
+                            {selectedDate !== today && (
+                                <button
+                                    onClick={() => setSelectedDate(today)}
+                                    className="text-xs text-amber-600 hover:underline whitespace-nowrap"
+                                >
+                                    Hoy
+                                </button>
+                            )}
+                        </div>
 
-                        <div className="relative">
+                        <div className="relative w-full sm:w-auto">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             <input
                                 type="text"
                                 value={inputs.name}
                                 onChange={e => setInputs(prev => ({ ...prev, name: e.target.value }))}
                                 placeholder="Buscar por nombre..."
-                                className="pl-8 pr-7 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-48"
+                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-48"
                             />
                             {inputs.name && (
                                 <button
@@ -201,14 +203,14 @@ export default function TableVisits() {
                             )}
                         </div>
 
-                        <div className="relative">
+                        <div className="relative w-full sm:w-auto">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             <input
                                 type="text"
                                 value={inputs.document_number}
                                 onChange={e => setInputs(prev => ({ ...prev, document_number: e.target.value }))}
                                 placeholder="Buscar por DPI..."
-                                className="pl-8 pr-7 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-44"
+                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
                             />
                             {inputs.document_number && (
                                 <button
@@ -222,73 +224,43 @@ export default function TableVisits() {
                     </div>
 
                     {list.length > 0 ? (
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <Th>ID</Th>
-                                    <Th>Fecha de la visita</Th>
-                                    <Th>Visitante</Th>
-                                    <Th align="center">DPI / Licencia</Th>
-                                    <Th>Acompañantes</Th>
-                                    <Th>Placas de Vehículo</Th>
-                                    <Th>Departamento</Th>
-                                    <Th>Área de Destino</Th>
-                                    <Th>Responsable</Th>
-                                    <Th align="center">H. Entrada</Th>
-                                    <Th align="center">H. Salida</Th>
-                                    <Th align="center">Estado</Th>
-                                    <Th align="center">Acciones</Th>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
+                        <>
+                            {/* Tarjetas para móvil */}
+                            <div className="sm:hidden space-y-3 px-4 py-3">
                                 {list.map(visit => (
-                                    <TableRow key={visit.id}>
-                                        <Td>{visit.id}</Td>
-                                        <Td>
-                                            {visit.date
-                                                ? visit.date.split("T")[0].split("-").reverse().join("/")
-                                                : "—"}
-                                        </Td>
-                                        <Td>
-                                            <div className="text-sm">
-                                                <p className="font-medium">{visit.company?.name ?? "—"}</p>
+                                    <div
+                                        key={visit.id}
+                                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-2"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="font-medium text-gray-800 truncate">{visit.company?.name ?? "—"}</p>
                                                 {visit.company_person && (
-                                                    <p className="text-slate-400">{visit.company_person.name}</p>
+                                                    <p className="text-xs text-slate-400 truncate">{visit.company_person.name}</p>
                                                 )}
                                             </div>
-                                        </Td>
-                                        <Td align="center">
-                                            {visit.company_person ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    {visit.company_person.has_document_photo_front && (
-                                                        <button
-                                                            onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
-                                                            className="btn-icon btn-icon-primary"
-                                                            title="Ver DPI"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                    )}
-                                                    {visit.company_person.has_license_photo && (
-                                                        <button
-                                                            onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
-                                                            className="btn-icon btn-icon-primary"
-                                                            title="Ver Licencia"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                    )}
-                                                    {!visit.company_person.has_document_photo_front && !visit.company_person.has_license_photo && (
-                                                        <span className="text-slate-400 text-xs">Sin fotos</span>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <span className="text-gray-400 text-sm">—</span>
-                                            )}
-                                        </Td>
-                                        
-                                        <Td>
-                                            {visit.visit_companions && visit.visit_companions.length > 0 ? (
+                                            <span className="shrink-0">
+                                                <StatusBadge name={visit.visit_status?.name} />
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm text-slate-600">
+                                            <p><span className="text-slate-400">ID:</span> {visit.id}</p>
+                                            <p>
+                                                <span className="text-slate-400">Fecha:</span>{" "}
+                                                {visit.date ? visit.date.split("T")[0].split("-").reverse().join("/") : "—"}
+                                            </p>
+                                            <p className="col-span-2"><span className="text-slate-400">Departamento:</span> {visit.department?.name ?? "—"}</p>
+                                            <p className="col-span-2"><span className="text-slate-400">Destino:</span> {visit.destination}</p>
+                                            <p className="col-span-2"><span className="text-slate-400">Responsable:</span> {visit.responsible_person ?? "—"}</p>
+                                            <p><span className="text-slate-400">Placas:</span> {visit.license_plate ?? "—"}</p>
+                                            <p><span className="text-slate-400">Entrada:</span> {visit.entry_time ?? "—"}</p>
+                                            <p><span className="text-slate-400">Salida:</span> {visit.exit_time ?? "—"}</p>
+                                        </div>
+
+                                        {visit.visit_companions && visit.visit_companions.length > 0 && (
+                                            <div className="pt-2 border-t border-gray-100">
+                                                <p className="text-xs font-semibold text-slate-500 mb-1">Acompañantes</p>
                                                 <ul className="text-sm space-y-1">
                                                     {visit.visit_companions.map((c, i) => (
                                                         <li key={c.id ?? i} className="text-slate-600">
@@ -297,44 +269,166 @@ export default function TableVisits() {
                                                         </li>
                                                     ))}
                                                 </ul>
-                                            ) : (
-                                                <span className="text-slate-400 text-sm">—</span>
-                                            )}
-                                        </Td>
-                                        <Td>{visit.license_plate ?? "—"}</Td>
-                                        <Td>{visit.department?.name ?? "—"}</Td>
-                                        <Td>{visit.destination}</Td>
-                                        <Td>{visit.responsible_person ?? "—"}</Td>
-                                        <Td align="center">{visit.entry_time ?? "—"}</Td>
-                                        <Td align="center">{visit.exit_time ?? "—"}</Td>
-                                        <Td align="center">
-                                            <StatusBadge name={visit.visit_status?.name} />
-                                        </Td>
-                                        <Td align="center">
-                                            <TableActions>
-                                                <Link
-                                                    to={`/visit/${visit.id}/edit`}
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                            {visit.company_person?.has_document_photo_front && (
+                                                <button
+                                                    onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
                                                     className="btn-icon btn-icon-primary"
-                                                    title="Editar"
+                                                    title="Ver DPI"
                                                 >
-                                                    <Pencil size={16} />
-                                                </Link>
-                                                {/* Delete button — only for PROGRAMADA visits and users with visits:delete permission */}
-                                                {canDelete && visit.visit_status?.name === "PROGRAMADA" && (
-                                                    <button
-                                                        onClick={() => setConfirmDeleteId(visit.id)}
-                                                        className="btn-icon btn-icon-danger"
-                                                        title="Eliminar visita"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </TableActions>
-                                        </Td>
-                                    </TableRow>
+                                                    <Eye size={16} />
+                                                </button>
+                                            )}
+                                            {visit.company_person?.has_license_photo && (
+                                                <button
+                                                    onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Ver Licencia"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                            )}
+                                            <Link
+                                                to={`/visit/${visit.id}/edit`}
+                                                className="btn-icon btn-icon-primary"
+                                                title="Editar"
+                                            >
+                                                <Pencil size={16} />
+                                            </Link>
+                                            {canDelete && visit.visit_status?.name === "PROGRAMADA" && (
+                                                <button
+                                                    onClick={() => setConfirmDeleteId(visit.id)}
+                                                    className="btn-icon btn-icon-danger"
+                                                    title="Eliminar visita"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </div>
+
+                            {/* Tabla para tablet y escritorio */}
+                            <div className="hidden sm:block overflow-x-auto">
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <Th>ID</Th>
+                                            <Th>Fecha de la visita</Th>
+                                            <Th>Visitante</Th>
+                                            <Th align="center">DPI / Licencia</Th>
+                                            <Th>Acompañantes</Th>
+                                            <Th>Placas de Vehículo</Th>
+                                            <Th>Departamento</Th>
+                                            <Th>Área de Destino</Th>
+                                            <Th>Responsable</Th>
+                                            <Th align="center">H. Entrada</Th>
+                                            <Th align="center">H. Salida</Th>
+                                            <Th align="center">Estado</Th>
+                                            <Th align="center">Acciones</Th>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {list.map(visit => (
+                                            <TableRow key={visit.id}>
+                                                <Td>{visit.id}</Td>
+                                                <Td>
+                                                    {visit.date
+                                                        ? visit.date.split("T")[0].split("-").reverse().join("/")
+                                                        : "—"}
+                                                </Td>
+                                                <Td>
+                                                    <div className="text-sm">
+                                                        <p className="font-medium">{visit.company?.name ?? "—"}</p>
+                                                        {visit.company_person && (
+                                                            <p className="text-slate-400">{visit.company_person.name}</p>
+                                                        )}
+                                                    </div>
+                                                </Td>
+                                                <Td align="center">
+                                                    {visit.company_person ? (
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {visit.company_person.has_document_photo_front && (
+                                                                <button
+                                                                    onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "document_photo_front" })}
+                                                                    className="btn-icon btn-icon-primary"
+                                                                    title="Ver DPI"
+                                                                >
+                                                                    <Eye size={16} />
+                                                                </button>
+                                                            )}
+                                                            {visit.company_person.has_license_photo && (
+                                                                <button
+                                                                    onClick={() => setPhotoTarget({ personId: visit.company_person!.id, photoType: "license_photo" })}
+                                                                    className="btn-icon btn-icon-primary"
+                                                                    title="Ver Licencia"
+                                                                >
+                                                                    <Eye size={16} />
+                                                                </button>
+                                                            )}
+                                                            {!visit.company_person.has_document_photo_front && !visit.company_person.has_license_photo && (
+                                                                <span className="text-slate-400 text-xs">Sin fotos</span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-sm">—</span>
+                                                    )}
+                                                </Td>
+
+                                                <Td>
+                                                    {visit.visit_companions && visit.visit_companions.length > 0 ? (
+                                                        <ul className="text-sm space-y-1">
+                                                            {visit.visit_companions.map((c, i) => (
+                                                                <li key={c.id ?? i} className="text-slate-600">
+                                                                    <span className="font-medium">{c.company_person?.name ?? "—"}</span>
+                                                                    <span className="text-slate-400 ml-1">DPI: {c.company_person?.document_number ?? "—"}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <span className="text-slate-400 text-sm">—</span>
+                                                    )}
+                                                </Td>
+                                                <Td>{visit.license_plate ?? "—"}</Td>
+                                                <Td>{visit.department?.name ?? "—"}</Td>
+                                                <Td>{visit.destination}</Td>
+                                                <Td>{visit.responsible_person ?? "—"}</Td>
+                                                <Td align="center">{visit.entry_time ?? "—"}</Td>
+                                                <Td align="center">{visit.exit_time ?? "—"}</Td>
+                                                <Td align="center">
+                                                    <StatusBadge name={visit.visit_status?.name} />
+                                                </Td>
+                                                <Td align="center">
+                                                    <TableActions>
+                                                        <Link
+                                                            to={`/visit/${visit.id}/edit`}
+                                                            className="btn-icon btn-icon-primary"
+                                                            title="Editar"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </Link>
+                                                        {/* Delete button — only for PROGRAMADA visits and users with visits:delete permission */}
+                                                        {canDelete && visit.visit_status?.name === "PROGRAMADA" && (
+                                                            <button
+                                                                onClick={() => setConfirmDeleteId(visit.id)}
+                                                                className="btn-icon btn-icon-danger"
+                                                                title="Eliminar visita"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        )}
+                                                    </TableActions>
+                                                </Td>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
                     ) : (
                         <TableEmpty message="No hay visitas registradas para esta fecha" />
                     )}

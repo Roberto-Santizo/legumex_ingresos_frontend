@@ -52,7 +52,7 @@ export default function LoginView() {
     try {
       await login(formData);
     } catch (error) {
-      if (isLoginApiError(error) && error.status === 423) {
+      if (isLoginApiError(error) && (error.status === 423 || error.status === 429)) {
         const match = error.message.match(/(\d+) minuto/);
         const minutes = match ? parseInt(match[1]) : 15;
         setLockSecondsLeft(minutes * 60);
