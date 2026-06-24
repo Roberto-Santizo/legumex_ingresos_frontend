@@ -23,8 +23,6 @@ export default function CreateEquipment() {
       },
       onSuccess:(data) =>{
         queryClient.invalidateQueries({queryKey: ["equipments"]})
-        // queryClient.invalidateQueries({queryKey: ["equipment-select"]})
-        // queryClient.invalidateQueries({queryKey: ["visitors-select"]})
         toast.success(data.message)
         navigate("/equipment")
       }

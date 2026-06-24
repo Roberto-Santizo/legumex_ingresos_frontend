@@ -33,9 +33,6 @@ export async function getEmployeeDeliveryHistoryAPI(employeeBenefitedId: number)
     try {
         const { data } = await api.get(`/delivery-equipment-transaction/by-employee/${employeeBenefitedId}`)
         const response = deliveryHistoryListSchema.safeParse(data.data)
-        if (!response.success) {
-            throw new Error("Respuesta del servidor inesperada")
-        }
         return response.data
     } catch (error) {
         if (isAxiosError(error) && error.response) {

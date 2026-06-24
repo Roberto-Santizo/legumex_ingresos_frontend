@@ -35,7 +35,9 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
 
     const equipmentOptions = (equipmentData?.response ?? []).map(equipmentItem => ({
         value: equipmentItem.equipment_id,
+        // label: `${equipmentItem.equipment_name} - ${equipmentItem.equipment_description}`
         label: equipmentItem.equipment_name,
+        description: equipmentItem.equipment_description,
     }))
 
     const { mutate, isPending } = useMutation({
@@ -159,11 +161,35 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
                                                     isSearchable
                                                     isClearable
                                                     noOptionsMessage={() => "No se encontraron equipos"}
-                                                    value={equipmentOptions.find(option => option.value === item.equipment_id) || null}
+                                                    value={
+                                                        equipmentOptions.find(
+                                                            option => option.value === item.equipment_id
+                                                        ) || null
+                                                    }
                                                     onChange={(selected) =>
                                                         updateItem(index, 'equipment_id', selected?.value ?? 0)
                                                     }
                                                     styles={searchableSelectStyles}
+                                                    formatOptionLabel={(option) => (
+                                                        <div>
+                                                            <div className="font-medium">
+                                                                {option.label}
+                                                            </div>
+                                                            {option.description && (
+                                                                <div className="text-xs text-gray-500">
+                                                                    {option.description}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    filterOption={(candidate, input) => {
+                                                        const search = input.toLowerCase();
+
+                                                        return (
+                                                            candidate.label.toLowerCase().includes(search) ||
+                                                            candidate.data.description?.toLowerCase().includes(search)
+                                                        );
+                                                    }}
                                                 />
                                             </div>
 

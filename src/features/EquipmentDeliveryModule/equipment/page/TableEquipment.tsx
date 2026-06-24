@@ -74,6 +74,7 @@ export default function TableEquipment() {
                   <TableRow>
                     <Th>ID</Th>
                     <Th>Nombre del Equipo</Th>
+                    <Th>Descripción</Th>
                     <Th>Equipo Creada Por:</Th>
                     <Th>Acciones</Th>
                   </TableRow>
@@ -83,6 +84,7 @@ export default function TableEquipment() {
                     <TableRow key={equipment.equipment_id}>
                       <Td>{equipment.equipment_id}</Td>
                       <Td>{equipment.equipment_name}</Td>
+                      <Td>{equipment.equipment_description}</Td>
                       <Td>{equipment.created_by ?? "—"}</Td>
                       <Td align="center">
                         <TableActions>

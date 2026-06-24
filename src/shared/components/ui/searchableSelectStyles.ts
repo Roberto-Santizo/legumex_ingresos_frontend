@@ -52,6 +52,8 @@ export const searchableSelectStyles: any = {
   menuList: (base: CSSObjectWithLabel) => ({
     ...base,
     maxHeight: "200px",
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
     padding: 0,
   }),
   noOptionsMessage: (base: CSSObjectWithLabel) => ({
