@@ -30,11 +30,29 @@ export async function getVisitsTodayAPI() {
     }
 }
 
-export async function getVisitsAPI(page: number = 1, filters?: { date?: string; status?: string; name?: string; document_number?: string }) {
+export async function getVisitsAPI(
+    page: number = 1,
+    filters?: {
+        date?: string
+        status?: string
+        name?: string
+        document_number?: string
+        company_name?: string
+    }
+) {
     try {
-        const limit = 10;
-        const { data } = await api.get("/visit", { params: { page, limit, ...filters } })
+        const limit = 10
+
+        const { data } = await api.get("/visit", {
+            params: {
+                page,
+                limit,
+                ...filters,
+            },
+        })
+
         const parsedData = getVisitsSchema.parse(data)
+
         return {
             visits: parsedData.response,
             lastPage: parsedData.lastPage,
@@ -43,6 +61,7 @@ export async function getVisitsAPI(page: number = 1, filters?: { date?: string; 
         if (isAxiosError(error) && error.response) {
             throw new Error(error.response.data.message)
         }
+
         throw error
     }
 }

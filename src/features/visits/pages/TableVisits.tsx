@@ -126,8 +126,8 @@ export default function TableVisits() {
     }).format(new Date())
 
     const [selectedDate, setSelectedDate] = useState(today)
-    const [inputs, setInputs] = useState({ name: "", document_number: "" })
-    const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "" })
+    const [inputs, setInputs] = useState({ name: "", document_number: "", company_name: "" })
+    const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "", company_name: "" })
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -143,6 +143,7 @@ export default function TableVisits() {
             date: selectedDate,
             name: debouncedFilters.name || undefined,
             document_number: debouncedFilters.document_number || undefined,
+            company_name: debouncedFilters.company_name || undefined
         }),
         placeholderData: (previousData) => previousData,
     })
@@ -222,6 +223,24 @@ export default function TableVisits() {
                             {inputs.document_number && (
                                 <button
                                     onClick={() => setInputs(prev => ({ ...prev, document_number: "" }))}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                        </div>
+                        <div className="relative w-full sm:w-auto">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={inputs.company_name}
+                                onChange={e => setInputs(prev => ({ ...prev, company_name: e.target.value }))}
+                                placeholder="Buscar por empresa..."
+                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
+                            />
+                            {inputs.company_name && (
+                                <button
+                                    onClick={() => setInputs(prev => ({ ...prev, company_name: "" }))}
                                     className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                 >
                                     <X size={13} />
