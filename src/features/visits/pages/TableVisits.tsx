@@ -117,7 +117,14 @@ export default function TableVisits() {
     const [photoTarget, setPhotoTarget] = useState<PhotoTarget | null>(null)
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
-    const today = new Date().toISOString().split("T")[0]
+    // const today = new Date().toISOString().split("T")[0]
+    const today = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Guatemala",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date())
+
     const [selectedDate, setSelectedDate] = useState(today)
     const [inputs, setInputs] = useState({ name: "", document_number: "" })
     const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "" })
