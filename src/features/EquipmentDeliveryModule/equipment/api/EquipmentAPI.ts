@@ -1,7 +1,7 @@
 import api from "shared/api/axios.ts";
 import { isAxiosError } from "axios";
-import type{ CreateEquipmentFormData } from "../schema/types.ts";
-import { getAllEquipmentPaginatedSchema, getEquipmentByIdSchema } from "../schema/types.ts";
+import type{ CreateEquipmentFormData,GetAllEquipmentListData } from "../schema/types.ts";
+import { getAllEquipmentPaginatedSchema, getEquipmentByIdSchema,getAllEquipmentListSchema } from "../schema/types.ts";
 
 export async function createEquipmentAPI(formData: CreateEquipmentFormData) {
      try{
@@ -40,6 +40,29 @@ export async function getEquipmentWithFiltersAPI(filters: {
     }
 }
 
+export async function getAllEquipmentAPI(): Promise<GetAllEquipmentListData> {
+    try {
+        const { data } = await api.get("/equipment", {
+            params: {
+                all: true
+            }
+        })
+
+        const response = getAllEquipmentListSchema.safeParse(data.response)
+
+        if (!response.success) {
+            throw new Error("Respuesta del servidor inesperada")
+        }
+
+        return response.data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message)
+        }
+        throw error
+    }
+}
+
 export async function getEquipmentByIdAPI(equipmentId: number){
     try{
         const {data}= await api.get(`/equipment/${equipmentId}`);
@@ -61,7 +84,7 @@ type EquipmentAPIType = {
 }
 export async function updateEquipmentAPI({equipment_id, formData}: EquipmentAPIType){
     try{
-        const {data} = await api.put(`/equipment/${equipment_id}`, formData);
+        const {data} = await api.patch(`/equipment/${equipment_id}`, formData);
         return data;
     }catch(error){
             if(isAxiosError(error) && error.response){

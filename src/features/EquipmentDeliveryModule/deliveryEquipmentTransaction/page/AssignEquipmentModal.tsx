@@ -5,7 +5,7 @@ import { toast } from "react-toastify"
 import Select from "react-select"
 import { Spinner } from "@/shared/components/Spinner"
 import { searchableSelectStyles } from "@/shared/components/ui/searchableSelectStyles"
-import { getEquipmentWithFiltersAPI } from "../../equipment/api/EquipmentAPI"
+import { getAllEquipmentAPI } from "../../equipment/api/EquipmentAPI"
 import { createEquipmentTransactionAPI } from "../api/DeliveryEquipmentTransactionAPI"
 import { STATUS_LABELS, STATUS_COLORS } from "../../employeeBenefited/schema/constants"
 import type { EmployeeBenefited } from "../../employeeBenefited/schema/types"
@@ -30,14 +30,13 @@ export default function AssignEquipmentModal({ employee, onClose }: Props) {
 
     const { data: equipmentData, isLoading: loadingEquipment } = useQuery({
         queryKey: ['equipments-select'],
-        queryFn: () => getEquipmentWithFiltersAPI({ page: 1 }),
+        queryFn: getAllEquipmentAPI,
     })
 
-    const equipmentOptions = (equipmentData?.response ?? []).map(equipmentItem => ({
-        value: equipmentItem.equipment_id,
-        // label: `${equipmentItem.equipment_name} - ${equipmentItem.equipment_description}`
-        label: equipmentItem.equipment_name,
-        description: equipmentItem.equipment_description,
+    const equipmentOptions = (equipmentData ?? []).map(equipment => ({
+        value: equipment.equipment_id,
+        label: equipment.equipment_name,
+        description: equipment.equipment_description,
     }))
 
     const { mutate, isPending } = useMutation({
