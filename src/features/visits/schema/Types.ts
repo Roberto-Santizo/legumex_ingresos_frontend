@@ -27,6 +27,13 @@ export const checkOutSchema = z.object({
     exit_time: z.string(),
 })
 
+// Horas permitidas para una salida temporal (debe coincidir con TEMP_EXIT_ALLOWED_HOURS del backend)
+export const TEMP_EXIT_HOURS_OPTIONS = [1, 2, 3, 4, 6, 8] as const
+
+export const tempExitSchema = z.object({
+    hours: z.number(),
+})
+
 const companyPersonSchema = z.object({
     id: z.number(),
     name: z.string(),
@@ -41,6 +48,9 @@ export const visitResponseSchema = z.object({
     date: z.string().nullable().optional(),
     entry_time: z.string().nullable().optional(),
     exit_time: z.string().nullable().optional(),
+    temp_exit_at: z.string().nullable().optional(),
+    temp_exit_expected_return_at: z.string().nullable().optional(),
+    auto_closed_no_return: z.boolean().nullable().optional(),
     visit_status_id: z.number().nullable().optional(),
     company_id: z.number().nullable().optional(),
     company_person_id: z.number().nullable().optional(),
@@ -69,4 +79,5 @@ export type GetVisitsApiResponse = z.infer<typeof getVisitsSchema>
 export type CreateVisitFormData = z.infer<typeof createVisitSchema>
 export type CheckInFormData = z.infer<typeof checkInSchema>
 export type CheckOutFormData = z.infer<typeof checkOutSchema>
+export type TempExitFormData = z.infer<typeof tempExitSchema>
 export type VisitResponse = z.infer<typeof visitResponseSchema>

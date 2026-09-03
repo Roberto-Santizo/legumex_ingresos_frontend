@@ -3,17 +3,34 @@ import { useForm, FormProvider } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
-import { Pencil, Trash2, LogIn, LogOut } from "lucide-react"
+import { Pencil, Trash2, LogIn, LogOut, Coffee, Undo2 } from "lucide-react"
 import CreateVisitForm from "@/features/visits/components/CreateVisitForm"
 import type { CreateVisitFormData } from "@/features/visits/schema/Types"
-import { getVisitByIdAPI, updateVisitAPI, deleteVisitAPI } from "@/features/visits/api/VisitAPI"
+import { TEMP_EXIT_HOURS_OPTIONS } from "@/features/visits/schema/Types"
+import { getVisitByIdAPI, updateVisitAPI, deleteVisitAPI, tempExitAPI, reingresoAPI } from "@/features/visits/api/VisitAPI"
 import { useAuth } from "@/hooks/useAuth"
 
 const STATUS_BADGE: Record<string, string> = {
     PROGRAMADA: "badge-warning",
     "EN PLANTA": "badge-success",
+    "SALIO TEMPORAL": "badge-purple",
     FINALIZADA: "badge-info",
     CANCELADA: "badge-error",
+}
+
+// Hora límite de regreso de una salida temporal, formateada en la zona horaria de la planta
+function formatExpectedReturn(isoDate?: string | null): string | null {
+    if (!isoDate) return null
+    const date = new Date(isoDate)
+    if (Number.isNaN(date.getTime())) return null
+    return new Intl.DateTimeFormat("es-GT", {
+        timeZone: "America/Guatemala",
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).format(date)
 }
 
 function VisitSummary({ visit }: { visit: NonNullable<Awaited<ReturnType<typeof getVisitByIdAPI>>> }) {
@@ -46,6 +63,11 @@ function VisitSummary({ visit }: { visit: NonNullable<Awaited<ReturnType<typeof 
                 )}
                 {visit.exit_time && (
                     <p><span className="font-semibold">Hora de salida:</span> {visit.exit_time}</p>
+                )}
+                {visit.auto_closed_no_return && (
+                    <p className="text-amber-600">
+                        <span className="font-semibold">Nota:</span> la visita se finalizó automáticamente porque el visitante no regresó de su salida temporal.
+                    </p>
                 )}
             </div>
         </div>
@@ -166,6 +188,92 @@ function CheckOutCard({ visitId }: { visitId: number }) {
     )
 }
 
+// Card to register a temporary exit (ej. hora de almuerzo) — only rendered when the user has visits:checkout permission
+function TempExitCard({ visitId }: { visitId: number }) {
+    const queryClient = useQueryClient()
+    const [hours, setHours] = useState<number>(TEMP_EXIT_HOURS_OPTIONS[0])
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => tempExitAPI({ visitId, hours }),
+        onError: (error) => toast.error(error.message),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["visits"] })
+            queryClient.invalidateQueries({ queryKey: ["visit", String(visitId)] })
+            toast.success(data.message)
+        },
+    })
+
+    return (
+        <div className="form-card mb-4">
+            <div className="form-card-accent bg-purple-500"></div>
+            <div className="p-5 space-y-3">
+                <div>
+                    <p className="text-sm font-semibold text-slate-700">Salir de planta por un momento</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                        Si no reingresa antes del plazo seleccionado, la visita se finalizará automáticamente.
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={hours}
+                        onChange={(e) => setHours(Number(e.target.value))}
+                        className="form-input form-input-normal text-sm py-1.5 flex-1"
+                    >
+                        {TEMP_EXIT_HOURS_OPTIONS.map((h) => (
+                            <option key={h} value={h}>{h} hora{h > 1 ? "s" : ""}</option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={() => { if (!isPending) mutate() }}
+                        disabled={isPending}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+                    >
+                        <Coffee size={16} />
+                        {isPending ? "Registrando..." : "Confirmar salida"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// Card shown while the visit is SALIO TEMPORAL — lets the visitor register their re-entry
+function ReingresoCard({ visitId, expectedReturnAt }: { visitId: number; expectedReturnAt?: string | null }) {
+    const queryClient = useQueryClient()
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => reingresoAPI(visitId),
+        onError: (error) => toast.error(error.message),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["visits"] })
+            queryClient.invalidateQueries({ queryKey: ["visit", String(visitId)] })
+            toast.success(data.message)
+        },
+    })
+
+    return (
+        <div className="form-card mb-4">
+            <div className="form-card-accent bg-purple-500"></div>
+            <div className="p-5 flex items-center justify-between gap-3">
+                <div>
+                    <p className="text-sm font-semibold text-slate-700">El visitante salió temporalmente</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                        Debe regresar antes de: {formatExpectedReturn(expectedReturnAt) ?? "—"}
+                    </p>
+                </div>
+                <button
+                    onClick={() => { if (!isPending) mutate() }}
+                    disabled={isPending}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+                >
+                    <Undo2 size={16} />
+                    {isPending ? "Registrando..." : "Registrar reingreso"}
+                </button>
+            </div>
+        </div>
+    )
+}
+
 // Danger zone with inline confirmation — only rendered when the user has visits:delete permission
 function DeleteSection({ visitId }: { visitId: number }) {
     const navigate = useNavigate()
@@ -272,12 +380,33 @@ export default function EditVisit() {
                 {status === "EN PLANTA" && (
                     <>
                         {canCheckOut ? (
-                            <CheckOutCard visitId={Number(visitId)} />
+                            <>
+                                <TempExitCard visitId={Number(visitId)} />
+                                <CheckOutCard visitId={Number(visitId)} />
+                            </>
                         ) : (
                             <div className="form-card">
                                 <div className="form-card-accent bg-blue-500"></div>
                                 <div className="p-5 text-sm text-slate-600">
                                     <p>El visitante está actualmente en planta. Pendiente de registro de salida.</p>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {status === "SALIO TEMPORAL" && (
+                    <>
+                        {canCheckIn && <ReingresoCard visitId={Number(visitId)} expectedReturnAt={visit.temp_exit_expected_return_at} />}
+                        {canCheckOut && <CheckOutCard visitId={Number(visitId)} />}
+                        {!canCheckIn && !canCheckOut && (
+                            <div className="form-card">
+                                <div className="form-card-accent bg-purple-500"></div>
+                                <div className="p-5 text-sm text-slate-600">
+                                    <p>
+                                        El visitante salió temporalmente. Debe regresar antes de:{" "}
+                                        {formatExpectedReturn(visit.temp_exit_expected_return_at) ?? "—"}
+                                    </p>
                                 </div>
                             </div>
                         )}

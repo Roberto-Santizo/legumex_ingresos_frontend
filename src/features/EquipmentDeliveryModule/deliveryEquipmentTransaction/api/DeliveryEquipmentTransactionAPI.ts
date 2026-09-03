@@ -1,4 +1,4 @@
-import api from "shared/api/axios.ts"
+import api from "@/shared/api/axios.ts"
 import { isAxiosError } from "axios"
 import { deliveryHistoryListSchema, type CreateTransactionPayload, type UploadFinalPhotoPayload } from "../schema/types"
 

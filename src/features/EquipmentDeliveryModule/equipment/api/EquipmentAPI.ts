@@ -1,4 +1,4 @@
-import api from "shared/api/axios.ts";
+import api from "@/shared/api/axios.ts";
 import { isAxiosError } from "axios";
 import type{ CreateEquipmentFormData,GetAllEquipmentListData } from "../schema/types.ts";
 import { getAllEquipmentPaginatedSchema, getEquipmentByIdSchema,getAllEquipmentListSchema } from "../schema/types.ts";

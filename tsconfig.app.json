@@ -24,14 +24,13 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "baseUrl": "src",
     "paths": {
-      "@/*": ["*"],
-      "@/app/*": ["app/*"],
-      "@/features/*": ["features/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/context/*": ["context/*"],
-      "@/AppRouter/*": ["AppRouter/*"],
+      "@/*": ["./src/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/context/*": ["./src/context/*"],
+      "@/AppRouter/*": ["./src/AppRouter/*"],
     }
   },
   "include": ["src"]

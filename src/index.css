@@ -220,6 +220,11 @@
   color: #92400e;
 }
 
+.badge-purple {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
 /* --- Responsive Table --- */
 @media (max-width: 768px) {
   .table-container {

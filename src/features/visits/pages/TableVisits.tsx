@@ -2,9 +2,10 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable"
-import { Pencil, Eye, X, Trash2, Search } from "lucide-react"
+import { Pencil, Eye, X, Trash2, Search, Coffee, Undo2 } from "lucide-react"
 import { toast } from "react-toastify"
-import { getVisitsAPI, deleteVisitAPI } from "@/features/visits/api/VisitAPI"
+import { getVisitsAPI, deleteVisitAPI, tempExitAPI, reingresoAPI } from "@/features/visits/api/VisitAPI"
+import { TEMP_EXIT_HOURS_OPTIONS } from "@/features/visits/schema/Types"
 import { getVisitorByIdAPI } from "@/features/visitors/api/VisitorsAPI"
 import PaginationComponent from "@/shared/components/PaginationComponent"
 import { useAuth } from "@/hooks/useAuth"
@@ -12,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth"
 const STATUS_BADGE: Record<string, string> = {
     PROGRAMADA: "badge-warning",
     "EN PLANTA": "badge-success",
+    "SALIO TEMPORAL": "badge-purple",
     FINALIZADA: "badge-info",
     CANCELADA: "badge-error",
 }
@@ -19,6 +21,20 @@ const STATUS_BADGE: Record<string, string> = {
 function StatusBadge({ name }: { name?: string }) {
     if (!name) return <span className="text-slate-400">—</span>
     return <span className={STATUS_BADGE[name] ?? "badge-info"}>{name}</span>
+}
+
+function formatExpectedReturn(isoDate?: string | null): string | null {
+    if (!isoDate) return null
+    const date = new Date(isoDate)
+    if (Number.isNaN(date.getTime())) return null
+    return new Intl.DateTimeFormat("es-GT", {
+        timeZone: "America/Guatemala",
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).format(date)
 }
 
 type PhotoTarget = { personId: number; photoType: "document_photo_front" | "license_photo" }
@@ -38,7 +54,7 @@ function PhotoPreviewModal({ target, onClose }: { target: PhotoTarget; onClose: 
         >
             <div
                 className="relative bg-white rounded-lg shadow-xl w-full max-w-lg p-4"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
                 <button
                     onClick={onClose}
@@ -61,7 +77,6 @@ function PhotoPreviewModal({ target, onClose }: { target: PhotoTarget; onClose: 
     )
 }
 
-// Inline delete confirmation modal — shown when user clicks the trash button
 function ConfirmDeleteModal({ visitId, onClose }: { visitId: number; onClose: () => void }) {
     const queryClient = useQueryClient()
 
@@ -82,7 +97,7 @@ function ConfirmDeleteModal({ visitId, onClose }: { visitId: number; onClose: ()
         >
             <div
                 className="relative bg-white rounded-lg shadow-xl w-full max-w-sm p-6 space-y-4"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
                 <h2 className="text-base font-semibold text-slate-800">Eliminar visita #{visitId}</h2>
                 <p className="text-sm text-slate-600">
@@ -109,15 +124,104 @@ function ConfirmDeleteModal({ visitId, onClose }: { visitId: number; onClose: ()
     )
 }
 
+
+function TempExitModal({ visitId, onClose }: { visitId: number; onClose: () => void }) {
+    const queryClient = useQueryClient()
+    const [hours, setHours] = useState<number>(TEMP_EXIT_HOURS_OPTIONS[0])
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => tempExitAPI({ visitId, hours }),
+        onError: (error) => { toast.error(error.message); onClose() },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["visits"] })
+            toast.success(data.message)
+            onClose()
+        },
+    })
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            onClick={onClose}
+        >
+            <div
+                className="relative bg-white rounded-lg shadow-xl w-full max-w-sm p-6 space-y-4"
+                onClick={(event) => event.stopPropagation()}
+            >
+                <h2 className="text-base font-semibold text-slate-800">Salir de planta por un momento</h2>
+                <p className="text-sm text-slate-600">
+                    Indica cuántas horas estará afuera el visitante. Si no reingresa antes de ese tiempo,
+                    la visita se finalizará automáticamente.
+                </p>
+                <div className="form-group">
+                    <label htmlFor="temp-exit-hours" className="form-label">Horas fuera de planta</label>
+                    <select
+                        id="temp-exit-hours"
+                        value={hours}
+                        onChange={(event) => setHours(Number(event.target.value))}
+                        className="form-input form-input-normal text-sm"
+                    >
+                        {TEMP_EXIT_HOURS_OPTIONS.map((hourOption) => (
+                            <option key={hourOption} value={hourOption}>{hourOption} hora{hourOption > 1 ? "s" : ""}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex gap-3 justify-end">
+                    <button
+                        onClick={onClose}
+                        disabled={isPending}
+                        className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={() => mutate()}
+                        disabled={isPending}
+                        className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {isPending ? "Registrando..." : "Confirmar salida"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function ReingresoButton({ visitId }: { visitId: number }) {
+    const queryClient = useQueryClient()
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => reingresoAPI(visitId),
+        onError: (error) => toast.error(error.message),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["visits"] })
+            toast.success(data.message)
+        },
+    })
+
+    return (
+        <button
+            onClick={() => mutate()}
+            disabled={isPending}
+            className="btn-icon btn-icon-primary disabled:opacity-50"
+            title="Registrar reingreso"
+        >
+            <Undo2 size={16} />
+        </button>
+    )
+}
+
 export default function TableVisits() {
     const { permissions } = useAuth()
     const canDelete = permissions.includes("visits:delete")
+    const canTempExit = permissions.includes("visits:checkout")
+    const canReingreso = permissions.includes("visits:checkin")
 
     const [currentPage, setCurrentPage] = useState(1)
     const [photoTarget, setPhotoTarget] = useState<PhotoTarget | null>(null)
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+    const [tempExitId, setTempExitId] = useState<number | null>(null)
 
-    // const today = new Date().toISOString().split("T")[0]
     const today = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Guatemala",
         year: "numeric",
@@ -141,6 +245,7 @@ export default function TableVisits() {
         queryKey: ["visits", selectedDate, currentPage, debouncedFilters],
         queryFn: () => getVisitsAPI(currentPage, {
             date: selectedDate,
+            exclude_status: "FINALIZADA",
             name: debouncedFilters.name || undefined,
             document_number: debouncedFilters.document_number || undefined,
             company_name: debouncedFilters.company_name || undefined
@@ -165,6 +270,12 @@ export default function TableVisits() {
                     onClose={() => setConfirmDeleteId(null)}
                 />
             )}
+            {tempExitId !== null && (
+                <TempExitModal
+                    visitId={tempExitId}
+                    onClose={() => setTempExitId(null)}
+                />
+            )}
             <div className="max-w-7xl w-full">
                 <TableContainer>
                     <TableHeader
@@ -179,7 +290,7 @@ export default function TableVisits() {
                             <input
                                 type="date"
                                 value={selectedDate}
-                                onChange={e => { setSelectedDate(e.target.value); setCurrentPage(1) }}
+                                onChange={event => { setSelectedDate(event.target.value); setCurrentPage(1) }}
                                 className="form-input form-input-normal text-sm py-1 flex-1 sm:w-48 sm:flex-initial"
                             />
                             {selectedDate !== today && (
@@ -197,7 +308,7 @@ export default function TableVisits() {
                             <input
                                 type="text"
                                 value={inputs.name}
-                                onChange={e => setInputs(prev => ({ ...prev, name: e.target.value }))}
+                                onChange={event => setInputs(prev => ({ ...prev, name: event.target.value }))}
                                 placeholder="Buscar por nombre..."
                                 className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-48"
                             />
@@ -216,7 +327,7 @@ export default function TableVisits() {
                             <input
                                 type="text"
                                 value={inputs.document_number}
-                                onChange={e => setInputs(prev => ({ ...prev, document_number: e.target.value }))}
+                                onChange={event => setInputs(prev => ({ ...prev, document_number: event.target.value }))}
                                 placeholder="Buscar por DPI..."
                                 className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
                             />
@@ -234,7 +345,7 @@ export default function TableVisits() {
                             <input
                                 type="text"
                                 value={inputs.company_name}
-                                onChange={e => setInputs(prev => ({ ...prev, company_name: e.target.value }))}
+                                onChange={event => setInputs(prev => ({ ...prev, company_name: event.target.value }))}
                                 placeholder="Buscar por empresa..."
                                 className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
                             />
@@ -251,7 +362,6 @@ export default function TableVisits() {
 
                     {list.length > 0 ? (
                         <>
-                            {/* Tarjetas para móvil */}
                             <div className="sm:hidden space-y-3 px-4 py-3">
                                 {list.map(visit => (
                                     <div
@@ -282,16 +392,22 @@ export default function TableVisits() {
                                             <p><span className="text-slate-400">Placas:</span> {visit.license_plate ?? "—"}</p>
                                             <p><span className="text-slate-400">Entrada:</span> {visit.entry_time ?? "—"}</p>
                                             <p><span className="text-slate-400">Salida:</span> {visit.exit_time ?? "—"}</p>
+                                            {visit.visit_status?.name === "SALIO TEMPORAL" && (
+                                                <p className="col-span-2 text-purple-600">
+                                                    <span className="text-slate-400">Debe regresar antes de:</span>{" "}
+                                                    {formatExpectedReturn(visit.temp_exit_expected_return_at) ?? "—"}
+                                                </p>
+                                            )}
                                         </div>
 
                                         {visit.visit_companions && visit.visit_companions.length > 0 && (
                                             <div className="pt-2 border-t border-gray-100">
                                                 <p className="text-xs font-semibold text-slate-500 mb-1">Acompañantes</p>
                                                 <ul className="text-sm space-y-1">
-                                                    {visit.visit_companions.map((c, i) => (
-                                                        <li key={c.id ?? i} className="text-slate-600">
-                                                            <span className="font-medium">{c.company_person?.name ?? "—"}</span>
-                                                            <span className="text-slate-400 ml-1">DPI: {c.company_person?.document_number ?? "—"}</span>
+                                                    {visit.visit_companions.map((companion, index) => (
+                                                        <li key={companion.id ?? index} className="text-slate-600">
+                                                            <span className="font-medium">{companion.company_person?.name ?? "—"}</span>
+                                                            <span className="text-slate-400 ml-1">DPI: {companion.company_person?.document_number ?? "—"}</span>
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -324,6 +440,18 @@ export default function TableVisits() {
                                             >
                                                 <Pencil size={16} />
                                             </Link>
+                                            {canTempExit && visit.visit_status?.name === "EN PLANTA" && (
+                                                <button
+                                                    onClick={() => setTempExitId(visit.id)}
+                                                    className="btn-icon btn-icon-primary"
+                                                    title="Salir de planta por un momento"
+                                                >
+                                                    <Coffee size={16} />
+                                                </button>
+                                            )}
+                                            {canReingreso && visit.visit_status?.name === "SALIO TEMPORAL" && (
+                                                <ReingresoButton visitId={visit.id} />
+                                            )}
                                             {canDelete && visit.visit_status?.name === "PROGRAMADA" && (
                                                 <button
                                                     onClick={() => setConfirmDeleteId(visit.id)}
@@ -338,7 +466,6 @@ export default function TableVisits() {
                                 ))}
                             </div>
 
-                            {/* Tabla para tablet y escritorio */}
                             <div className="hidden sm:block overflow-x-auto">
                                 <Table>
                                     <TableHead>
@@ -408,10 +535,10 @@ export default function TableVisits() {
                                                 <Td>
                                                     {visit.visit_companions && visit.visit_companions.length > 0 ? (
                                                         <ul className="text-sm space-y-1">
-                                                            {visit.visit_companions.map((c, i) => (
-                                                                <li key={c.id ?? i} className="text-slate-600">
-                                                                    <span className="font-medium">{c.company_person?.name ?? "—"}</span>
-                                                                    <span className="text-slate-400 ml-1">DPI: {c.company_person?.document_number ?? "—"}</span>
+                                                            {visit.visit_companions.map((companion, index) => (
+                                                                <li key={companion.id ?? index} className="text-slate-600">
+                                                                    <span className="font-medium">{companion.company_person?.name ?? "—"}</span>
+                                                                    <span className="text-slate-400 ml-1">DPI: {companion.company_person?.document_number ?? "—"}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
@@ -427,6 +554,11 @@ export default function TableVisits() {
                                                 <Td align="center">{visit.exit_time ?? "—"}</Td>
                                                 <Td align="center">
                                                     <StatusBadge name={visit.visit_status?.name} />
+                                                    {visit.visit_status?.name === "SALIO TEMPORAL" && (
+                                                        <p className="text-xs text-purple-600 mt-1 whitespace-nowrap">
+                                                            Regresa: {formatExpectedReturn(visit.temp_exit_expected_return_at) ?? "—"}
+                                                        </p>
+                                                    )}
                                                 </Td>
                                                 <Td align="center">
                                                     <TableActions>
@@ -437,7 +569,18 @@ export default function TableVisits() {
                                                         >
                                                             <Pencil size={16} />
                                                         </Link>
-                                                        {/* Delete button — only for PROGRAMADA visits and users with visits:delete permission */}
+                                                        {canTempExit && visit.visit_status?.name === "EN PLANTA" && (
+                                                            <button
+                                                                onClick={() => setTempExitId(visit.id)}
+                                                                className="btn-icon btn-icon-primary"
+                                                                title="Salir de planta por un momento"
+                                                            >
+                                                                <Coffee size={16} />
+                                                            </button>
+                                                        )}
+                                                        {canReingreso && visit.visit_status?.name === "SALIO TEMPORAL" && (
+                                                            <ReingresoButton visitId={visit.id} />
+                                                        )}
                                                         {canDelete && visit.visit_status?.name === "PROGRAMADA" && (
                                                             <button
                                                                 onClick={() => setConfirmDeleteId(visit.id)}

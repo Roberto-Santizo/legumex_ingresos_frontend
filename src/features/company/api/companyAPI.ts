@@ -7,7 +7,7 @@ export async function createCompanyAPI(formData: CreateCompanyFormData) {
     try {
         const {data} = await api.post("/company",formData)
         return data;
-    } catch (error) {
+    } catch (error) {   
         if(isAxiosError(error)&& error.response){
             throw new Error(error.response.data.message)
         }

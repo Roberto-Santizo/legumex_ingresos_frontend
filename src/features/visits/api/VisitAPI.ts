@@ -35,6 +35,7 @@ export async function getVisitsAPI(
     filters?: {
         date?: string
         status?: string
+        exclude_status?: string
         name?: string
         document_number?: string
         company_name?: string
@@ -94,6 +95,30 @@ export async function checkInAPI({ visitId, formData }: { visitId: number; formD
 export async function checkOutAPI({ visitId, formData }: { visitId: number; formData: CheckOutFormData }) {
     try {
         const { data } = await api.patch(`/visit/${visitId}/checkout`, formData)
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message)
+        }
+        throw error
+    }
+}
+
+export async function tempExitAPI({ visitId, hours }: { visitId: number; hours: number }) {
+    try {
+        const { data } = await api.patch(`/visit/${visitId}/temp-exit`, { hours })
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message)
+        }
+        throw error
+    }
+}
+
+export async function reingresoAPI(visitId: number) {
+    try {
+        const { data } = await api.patch(`/visit/${visitId}/reingreso`)
         return data
     } catch (error) {
         if (isAxiosError(error) && error.response) {

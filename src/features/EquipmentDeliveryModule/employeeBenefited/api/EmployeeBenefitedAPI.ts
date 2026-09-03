@@ -1,4 +1,4 @@
-import api from "shared/api/axios.ts";
+import api from "@/shared/api/axios.ts";
 import { isAxiosError } from "axios";
 import { externalEmployeeListSchema, employeeBenefitedListSchema, type ExternalEmployee } from "../schema/types.ts";
 

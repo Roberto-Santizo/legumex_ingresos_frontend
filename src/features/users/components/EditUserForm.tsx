@@ -5,7 +5,7 @@ import {toast} from "react-toastify"
 import { useNavigate } from "react-router";
 
 import CreateUserForm from "./CreateUserForm"
-import type {CreateUserFormData} from "features/users/schemas/types"
+import type {CreateUserFormData} from "@/features/users/schemas/types"
 import { updateUserAPI } from "../api/UserAPI";
 
 type EditUserFormProps = {
