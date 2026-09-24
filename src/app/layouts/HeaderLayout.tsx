@@ -87,11 +87,11 @@ export default function Header({sidebarOpen,setSidebarOpen,mobileMenuOpen,setMob
           </div>
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 text-center">
-          <p className="text-lg lg:text-xl font-light italic tracking-wide text-slate-100 whitespace-nowrap">
+          <p className="hidden lg:block text-xl font-light italic tracking-wide text-slate-100 whitespace-nowrap">
             “Lo que la mente puede concebir y creer, lo puede lograr.”
           </p>
-
-          <p className="mt-0.5 text-xs lg:text-sm font-semibold tracking-[0.25em] uppercase text-cyan-400">
+        
+          <p className="hidden lg:block mt-0.5 text-sm font-semibold tracking-[0.25em] uppercase text-cyan-400">
             — Napoleon Hill
           </p>
         </div>
