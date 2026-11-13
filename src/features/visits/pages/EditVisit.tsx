@@ -9,6 +9,7 @@ import type { CreateVisitFormData } from "@/features/visits/schema/Types"
 import { TEMP_EXIT_HOURS_OPTIONS } from "@/features/visits/schema/Types"
 import { getVisitByIdAPI, updateVisitAPI, deleteVisitAPI, tempExitAPI, reingresoAPI } from "@/features/visits/api/VisitAPI"
 import { useAuth } from "@/hooks/useAuth"
+import { liveVisitQueryOptions } from "@/features/visits/queries/liveVisitQueryOptions"
 
 const STATUS_BADGE: Record<string, string> = {
     PROGRAMADA: "badge-warning",
@@ -337,13 +338,15 @@ export default function EditVisit() {
     const { visitId } = useParams()
     const { permissions } = useAuth()
 
-    const { data: visit, isLoading } = useQuery({
+    const { data: visit, isLoading, isError, isFetchedAfterMount } = useQuery({
+        ...liveVisitQueryOptions,
         queryKey: ["visit", visitId],
         queryFn: () => getVisitByIdAPI(Number(visitId)),
         enabled: !!visitId,
     })
 
-    if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando datos de la visita...</p>
+    if (isLoading || (!isFetchedAfterMount && !isError)) return <p className="p-8 text-center text-slate-500">Cargando datos de la visita...</p>
+    if (isError) return <p className="p-8 text-center text-red-500">Error al cargar la visita.</p>
     if (!visit) return <p className="p-8 text-center text-red-500">Visita no encontrada.</p>
 
     const status = visit.visit_status?.name ?? ""

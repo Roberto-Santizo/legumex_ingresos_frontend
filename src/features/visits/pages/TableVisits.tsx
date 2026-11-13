@@ -9,6 +9,7 @@ import { TEMP_EXIT_HOURS_OPTIONS } from "@/features/visits/schema/Types"
 import { getVisitorByIdAPI } from "@/features/visitors/api/VisitorsAPI"
 import PaginationComponent from "@/shared/components/PaginationComponent"
 import { useAuth } from "@/hooks/useAuth"
+import { liveVisitQueryOptions } from "@/features/visits/queries/liveVisitQueryOptions"
 
 const STATUS_BADGE: Record<string, string> = {
     PROGRAMADA: "badge-warning",
@@ -241,7 +242,8 @@ export default function TableVisits() {
         return () => clearTimeout(timer)
     }, [inputs])
 
-    const { data, isLoading, isError } = useQuery({
+    const { data, isLoading, isError, isFetchedAfterMount } = useQuery({
+        ...liveVisitQueryOptions,
         queryKey: ["visits", selectedDate, currentPage, debouncedFilters],
         queryFn: () => getVisitsAPI(currentPage, {
             date: selectedDate,
@@ -250,10 +252,9 @@ export default function TableVisits() {
             document_number: debouncedFilters.document_number || undefined,
             company_name: debouncedFilters.company_name || undefined
         }),
-        placeholderData: (previousData) => previousData,
     })
 
-    if (isLoading) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
+    if (isLoading || (!isFetchedAfterMount && !isError)) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
     if (isError) return <p className="p-8 text-center text-red-500">Error al cargar las visitas.</p>
 
     const list = data?.visits ?? []
