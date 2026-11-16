@@ -97,21 +97,10 @@ export default function VisitFilters({ filters, date, today, onChange, onDateCha
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-3">
-                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={!date}
-                            onChange={event => onDateChange(event.target.checked ? "" : today)}
-                            className="h-4 w-4 rounded border-slate-300 accent-blue-600"
-                        />
-                        Todas las fechas
-                    </label>
-                    {date !== today && (
-                        <button type="button" onClick={() => onDateChange(today)} className="text-sm font-medium text-blue-600 hover:underline">Volver a hoy</button>
-                    )}
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
+                {date !== today && (
+                    <button type="button" onClick={() => onDateChange(today)} className="sm:mr-auto text-sm font-medium text-blue-600 hover:underline">Volver a hoy</button>
+                )}
                 <div className="flex items-center gap-2">
                     <button type="button" onClick={onClear} disabled={!hasFilters} className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed">
                         Limpiar filtros
@@ -121,7 +110,6 @@ export default function VisitFilters({ filters, date, today, onChange, onDateCha
                     </button>
                 </div>
             </div>
-            <p className="text-xs text-slate-500">La búsqueda es automática. Presiona Enter para buscar de inmediato.</p>
         </form>
     )
 }

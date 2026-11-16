@@ -262,7 +262,7 @@ export default function TableVisits() {
     }
 
     function changeDate(date: string) {
-        setSelectedDate(date)
+        setSelectedDate(date || today)
         searchNow()
     }
 
@@ -277,7 +277,7 @@ export default function TableVisits() {
         ...liveVisitQueryOptions,
         queryKey: ["visits", selectedDate, currentPage, debouncedFilters],
         queryFn: () => getVisitsAPI(currentPage, {
-            date: selectedDate || undefined,
+            date: selectedDate,
             exclude_status: "FINALIZADA",
             name: debouncedFilters.name || undefined,
             document_number: debouncedFilters.document_number || undefined,
@@ -294,9 +294,7 @@ export default function TableVisits() {
     const normalizedInputs = normalizeFilters(inputs)
     const isWaitingForSearch = (Object.keys(normalizedInputs) as (keyof VisitSearchFilters)[])
         .some(field => normalizedInputs[field] !== debouncedFilters[field])
-    const dateDescription = selectedDate
-        ? `el ${selectedDate.split("-").reverse().join("/")}`
-        : "en todas las fechas"
+    const dateDescription = `el ${selectedDate.split("-").reverse().join("/")}`
 
     return (
         <div className="flex items-start justify-center min-h-screen bg-slate-100 p-4">
@@ -602,14 +600,9 @@ export default function TableVisits() {
                         <div className="px-4 py-12 text-center space-y-3">
                             <Search size={32} aria-hidden="true" className="mx-auto text-slate-300" />
                             <p className="font-semibold text-slate-700">
-                                {hasSearchFilters ? "No encontramos visitas con estos filtros" : selectedDate ? "No hay visitas registradas para esta fecha" : "No hay visitas registradas"}
+                                {hasSearchFilters ? "No encontramos visitas con estos filtros" : "No hay visitas registradas para esta fecha"}
                             </p>
                             <p className="text-sm text-slate-500">Revisa el texto de búsqueda o prueba con otra fecha.</p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                {selectedDate && (
-                                    <button type="button" onClick={() => changeDate("")} className="text-sm font-medium text-blue-600 hover:underline">Buscar en todas las fechas</button>
-                                )}
-                            </div>
                         </div>
                     )}
 

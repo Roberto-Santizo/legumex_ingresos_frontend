@@ -116,24 +116,27 @@ describe('buscador de visitas', () => {
         expect(getVisitsAPI).toHaveBeenCalledTimes(calls)
     })
 
-    it('amplia la busqueda a todas las fechas conservando el nombre y permite restablecer los filtros', async () => {
+    it('busca unicamente en el dia seleccionado conservando el nombre y permite volver a hoy', async () => {
         vi.mocked(getVisitsAPI).mockResolvedValue({ visits: [], lastPage: 0, total: 0 })
         renderView(createClient())
         await screen.findByText('No hay visitas registradas para esta fecha')
         const date = screen.getByLabelText('Fecha de la visita') as HTMLInputElement
         const today = date.value
+        const otherDate = today === '2026-01-15' ? '2026-01-14' : '2026-01-15'
+        expect(screen.queryByText('Todas las fechas')).not.toBeInTheDocument()
+        expect(screen.queryByText('La búsqueda es automática. Presiona Enter para buscar de inmediato.')).not.toBeInTheDocument()
         fireEvent.change(screen.getByLabelText('Nombre del visitante'), { target: { value: 'Victor' } })
         fireEvent.submit(screen.getByRole('search'))
         await screen.findByText('No encontramos visitas con estos filtros')
 
         vi.mocked(getVisitsAPI).mockResolvedValue({ ...currentList, total: 21, lastPage: 3 })
-        fireEvent.click(screen.getByRole('button', { name: 'Buscar en todas las fechas' }))
+        expect(screen.queryByRole('button', { name: 'Buscar en todas las fechas' })).not.toBeInTheDocument()
+        fireEvent.change(date, { target: { value: otherDate } })
         await screen.findAllByText('Visitante pendiente')
         expect(getVisitsAPI).toHaveBeenLastCalledWith(1, expect.objectContaining({
-            date: undefined, name: 'Victor', exclude_status: 'FINALIZADA',
+            date: otherDate, name: 'Victor', exclude_status: 'FINALIZADA',
         }))
-        expect(screen.getByRole('checkbox', { name: 'Todas las fechas' })).toBeChecked()
-        expect(screen.getByRole('status')).toHaveTextContent('21 visitas encontradas en todas las fechas con los filtros aplicados.')
+        expect(screen.getByRole('status')).toHaveTextContent(`21 visitas encontradas el ${otherDate.split('-').reverse().join('/')} con los filtros aplicados.`)
 
         fireEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
         await waitFor(() => expect(getVisitsAPI).toHaveBeenLastCalledWith(1, expect.objectContaining({
@@ -141,7 +144,9 @@ describe('buscador de visitas', () => {
         })))
         expect(screen.getByLabelText('Nombre del visitante')).toHaveValue('')
         expect(date).toHaveValue(today)
-        expect(screen.getByRole('checkbox', { name: 'Todas las fechas' })).not.toBeChecked()
+        fireEvent.change(date, { target: { value: '' } })
+        expect(date).toHaveValue(today)
+        expect(vi.mocked(getVisitsAPI).mock.calls.every(([, filters]) => Boolean(filters?.date))).toBe(true)
     })
 
     it('vuelve a la primera pagina al cambiar un filtro', async () => {
