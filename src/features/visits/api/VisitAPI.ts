@@ -57,6 +57,7 @@ export async function getVisitsAPI(
         return {
             visits: parsedData.response,
             lastPage: parsedData.lastPage,
+            total: parsedData.total,
         }
     } catch (error) {
         if (isAxiosError(error) && error.response) {

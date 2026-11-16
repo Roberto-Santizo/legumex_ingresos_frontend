@@ -6,11 +6,11 @@
  */
 
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { checkInAPI, checkOutAPI } from '@/features/visits/api/VisitAPI'
+import { checkInAPI, checkOutAPI, getVisitsAPI } from '@/features/visits/api/VisitAPI'
 import api from '@/shared/api/axios'
 
 vi.mock('@/shared/api/axios', () => ({
-    default: { patch: vi.fn() },
+    default: { patch: vi.fn(), get: vi.fn() },
 }))
 
 /** Crea un objeto que imita un AxiosError con respuesta del servidor */
@@ -29,6 +29,18 @@ const BASE_CHECKIN = {
     badge_number: 'G-001',
     agent_id: 1,
 }
+
+describe('getVisitsAPI', () => {
+    it('conserva el total de coincidencias del servidor y envia los filtros de busqueda', async () => {
+        vi.mocked(api.get).mockResolvedValue({ data: {
+            statusCode: 200, response: [{ id: 1 }], total: 21, lastPage: 3, page: 1, limit: 10,
+        } })
+        const filters = { name: 'Victor', company_name: 'Empresa', exclude_status: 'FINALIZADA' }
+
+        expect(await getVisitsAPI(1, filters)).toEqual({ visits: [{ id: 1 }], total: 21, lastPage: 3 })
+        expect(api.get).toHaveBeenCalledWith('/visit', { params: { page: 1, limit: 10, ...filters } })
+    })
+})
 
 // ── checkInAPI ──────────────────────────────────────────────────────────────
 

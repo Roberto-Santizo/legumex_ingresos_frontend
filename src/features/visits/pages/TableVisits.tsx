@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableEmpty, TableActions } from "@/shared/components/ui/StyledTable"
+import { TableContainer, TableHeader, Table, TableHead, TableBody, TableRow, Th, Td, TableActions } from "@/shared/components/ui/StyledTable"
 import { Pencil, Eye, X, Trash2, Search, Coffee, Undo2 } from "lucide-react"
 import { toast } from "react-toastify"
 import { getVisitsAPI, deleteVisitAPI, tempExitAPI, reingresoAPI } from "@/features/visits/api/VisitAPI"
@@ -10,6 +10,18 @@ import { getVisitorByIdAPI } from "@/features/visitors/api/VisitorsAPI"
 import PaginationComponent from "@/shared/components/PaginationComponent"
 import { useAuth } from "@/hooks/useAuth"
 import { liveVisitQueryOptions } from "@/features/visits/queries/liveVisitQueryOptions"
+import VisitFilters from "@/features/visits/components/VisitFilters"
+import type { VisitSearchFilters } from "@/features/visits/components/VisitFilters"
+
+const emptyFilters: VisitSearchFilters = { name: "", document_number: "", company_name: "" }
+
+function normalizeFilters(filters: VisitSearchFilters): VisitSearchFilters {
+    return {
+        name: filters.name.trim().replace(/\s+/g, " "),
+        document_number: filters.document_number.trim().replace(/[\s-]+/g, ""),
+        company_name: filters.company_name.trim().replace(/\s+/g, " "),
+    }
+}
 
 const STATUS_BADGE: Record<string, string> = {
     PROGRAMADA: "badge-warning",
@@ -231,22 +243,41 @@ export default function TableVisits() {
     }).format(new Date())
 
     const [selectedDate, setSelectedDate] = useState(today)
-    const [inputs, setInputs] = useState({ name: "", document_number: "", company_name: "" })
-    const [debouncedFilters, setDebouncedFilters] = useState({ name: "", document_number: "", company_name: "" })
+    const [inputs, setInputs] = useState(emptyFilters)
+    const [debouncedFilters, setDebouncedFilters] = useState(emptyFilters)
 
     useEffect(() => {
+        const filters = normalizeFilters(inputs)
+        if ((Object.keys(filters) as (keyof VisitSearchFilters)[]).every(field => filters[field] === debouncedFilters[field])) return
         const timer = setTimeout(() => {
-            setDebouncedFilters(inputs)
+            setDebouncedFilters(filters)
             setCurrentPage(1)
         }, 400)
         return () => clearTimeout(timer)
-    }, [inputs])
+    }, [inputs, debouncedFilters])
 
-    const { data, isLoading, isError, isFetchedAfterMount } = useQuery({
+    function searchNow() {
+        setDebouncedFilters(normalizeFilters(inputs))
+        setCurrentPage(1)
+    }
+
+    function changeDate(date: string) {
+        setSelectedDate(date)
+        searchNow()
+    }
+
+    function clearFilters() {
+        setInputs(emptyFilters)
+        setDebouncedFilters(emptyFilters)
+        setSelectedDate(today)
+        setCurrentPage(1)
+    }
+
+    const { data, isLoading, isError, isFetchedAfterMount, refetch } = useQuery({
         ...liveVisitQueryOptions,
         queryKey: ["visits", selectedDate, currentPage, debouncedFilters],
         queryFn: () => getVisitsAPI(currentPage, {
-            date: selectedDate,
+            date: selectedDate || undefined,
             exclude_status: "FINALIZADA",
             name: debouncedFilters.name || undefined,
             document_number: debouncedFilters.document_number || undefined,
@@ -254,14 +285,21 @@ export default function TableVisits() {
         }),
     })
 
-    if (isLoading || (!isFetchedAfterMount && !isError)) return <p className="p-8 text-center text-slate-500">Cargando visitas...</p>
-    if (isError) return <p className="p-8 text-center text-red-500">Error al cargar las visitas.</p>
+    const isListLoading = isLoading || (!isFetchedAfterMount && !isError)
 
     const list = data?.visits ?? []
     const totalPages = data?.lastPage ?? 1
+    const total = data?.total ?? list.length
+    const hasSearchFilters = Object.values(debouncedFilters).some(Boolean)
+    const normalizedInputs = normalizeFilters(inputs)
+    const isWaitingForSearch = (Object.keys(normalizedInputs) as (keyof VisitSearchFilters)[])
+        .some(field => normalizedInputs[field] !== debouncedFilters[field])
+    const dateDescription = selectedDate
+        ? `el ${selectedDate.split("-").reverse().join("/")}`
+        : "en todas las fechas"
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
+        <div className="flex items-start justify-center min-h-screen bg-slate-100 p-4">
             {photoTarget && (
                 <PhotoPreviewModal target={photoTarget} onClose={() => setPhotoTarget(null)} />
             )}
@@ -285,83 +323,38 @@ export default function TableVisits() {
                         linkText="Crear Visita"
                     />
 
-                    <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 border-b border-slate-200">
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-semibold text-slate-600 whitespace-nowrap">Fecha:</label>
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={event => { setSelectedDate(event.target.value); setCurrentPage(1) }}
-                                className="form-input form-input-normal text-sm py-1 flex-1 sm:w-48 sm:flex-initial"
-                            />
-                            {selectedDate !== today && (
-                                <button
-                                    onClick={() => setSelectedDate(today)}
-                                    className="text-xs text-amber-600 hover:underline whitespace-nowrap"
-                                >
-                                    Hoy
-                                </button>
-                            )}
-                        </div>
+                    <VisitFilters
+                        filters={inputs}
+                        date={selectedDate}
+                        today={today}
+                        onChange={(field, value) => setInputs(previous => ({ ...previous, [field]: value }))}
+                        onDateChange={changeDate}
+                        onSearch={searchNow}
+                        onClear={clearFilters}
+                    />
 
-                        <div className="relative w-full sm:w-auto">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                value={inputs.name}
-                                onChange={event => setInputs(prev => ({ ...prev, name: event.target.value }))}
-                                placeholder="Buscar por nombre..."
-                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-48"
-                            />
-                            {inputs.name && (
-                                <button
-                                    onClick={() => setInputs(prev => ({ ...prev, name: "" }))}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={13} />
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="relative w-full sm:w-auto">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                value={inputs.document_number}
-                                onChange={event => setInputs(prev => ({ ...prev, document_number: event.target.value }))}
-                                placeholder="Buscar por DPI..."
-                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
-                            />
-                            {inputs.document_number && (
-                                <button
-                                    onClick={() => setInputs(prev => ({ ...prev, document_number: "" }))}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={13} />
-                                </button>
-                            )}
-                        </div>
-                        <div className="relative w-full sm:w-auto">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                            <input
-                                type="text"
-                                value={inputs.company_name}
-                                onChange={event => setInputs(prev => ({ ...prev, company_name: event.target.value }))}
-                                placeholder="Buscar por empresa..."
-                                className="pl-8 pr-7 py-1.5 sm:py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full sm:w-44"
-                            />
-                            {inputs.company_name && (
-                                <button
-                                    onClick={() => setInputs(prev => ({ ...prev, company_name: "" }))}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={13} />
-                                </button>
-                            )}
-                        </div>
+                    <div role="status" aria-live="polite" className="px-4 sm:px-6 py-3 text-sm text-slate-500 border-b border-slate-100">
+                        {isListLoading
+                            ? hasSearchFilters ? "Buscando visitas..." : "Cargando visitas..."
+                            : isWaitingForSearch
+                                ? "Preparando búsqueda..."
+                                : isError
+                                    ? "No se pudo completar la búsqueda."
+                                    : `${total} ${total === 1 ? "visita encontrada" : "visitas encontradas"} ${dateDescription}${hasSearchFilters ? " con los filtros aplicados" : ""}.`}
                     </div>
 
-                    {list.length > 0 ? (
+                    {isListLoading ? (
+                        <div aria-hidden="true" className="p-4 sm:p-6 space-y-3 min-h-64 motion-safe:animate-pulse">
+                            {[0, 1, 2, 3].map(row => (
+                                <div key={row} className="h-12 rounded-lg bg-slate-100" />
+                            ))}
+                        </div>
+                    ) : isError ? (
+                        <div className="p-8 text-center space-y-3">
+                            <p role="alert" className="text-red-500">Error al cargar las visitas.</p>
+                            <button type="button" onClick={() => { void refetch() }} className="text-sm font-medium text-blue-600 hover:underline">Reintentar búsqueda</button>
+                        </div>
+                    ) : list.length > 0 ? (
                         <>
                             <div className="sm:hidden space-y-3 px-4 py-3">
                                 {list.map(visit => (
@@ -371,9 +364,12 @@ export default function TableVisits() {
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0">
-                                                <p className="font-medium text-gray-800 truncate">{visit.company?.name ?? "—"}</p>
+                                                <p className="font-medium text-gray-800 truncate">{visit.company_person?.name ?? visit.company?.name ?? "—"}</p>
                                                 {visit.company_person && (
-                                                    <p className="text-xs text-slate-400 truncate">{visit.company_person.name}</p>
+                                                    <>
+                                                        <p className="text-xs text-slate-500 truncate">{visit.company?.name ?? "Sin empresa"}</p>
+                                                        <p className="text-xs text-slate-500">DPI: {visit.company_person.document_number}</p>
+                                                    </>
                                                 )}
                                             </div>
                                             <span className="shrink-0">
@@ -497,9 +493,12 @@ export default function TableVisits() {
                                                 </Td>
                                                 <Td>
                                                     <div className="text-sm">
-                                                        <p className="font-medium">{visit.company?.name ?? "—"}</p>
+                                                        <p className="font-medium">{visit.company_person?.name ?? visit.company?.name ?? "—"}</p>
                                                         {visit.company_person && (
-                                                            <p className="text-slate-400">{visit.company_person.name}</p>
+                                                            <>
+                                                                <p className="text-slate-500">{visit.company?.name ?? "Sin empresa"}</p>
+                                                                <p className="text-xs text-slate-500">DPI: {visit.company_person.document_number}</p>
+                                                            </>
                                                         )}
                                                     </div>
                                                 </Td>
@@ -600,14 +599,27 @@ export default function TableVisits() {
                             </div>
                         </>
                     ) : (
-                        <TableEmpty message="No hay visitas registradas para esta fecha" />
+                        <div className="px-4 py-12 text-center space-y-3">
+                            <Search size={32} aria-hidden="true" className="mx-auto text-slate-300" />
+                            <p className="font-semibold text-slate-700">
+                                {hasSearchFilters ? "No encontramos visitas con estos filtros" : selectedDate ? "No hay visitas registradas para esta fecha" : "No hay visitas registradas"}
+                            </p>
+                            <p className="text-sm text-slate-500">Revisa el texto de búsqueda o prueba con otra fecha.</p>
+                            <div className="flex flex-wrap justify-center gap-4">
+                                {selectedDate && (
+                                    <button type="button" onClick={() => changeDate("")} className="text-sm font-medium text-blue-600 hover:underline">Buscar en todas las fechas</button>
+                                )}
+                            </div>
+                        </div>
                     )}
 
-                    <PaginationComponent
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={(page) => setCurrentPage(page)}
-                    />
+                    {!isListLoading && !isError && list.length > 0 && (
+                        <PaginationComponent
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => setCurrentPage(page)}
+                        />
+                    )}
                 </TableContainer>
             </div>
         </div>
